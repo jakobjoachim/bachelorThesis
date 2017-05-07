@@ -1,0 +1,24 @@
+Debugging methodik ,jetzt erstmal vertrag aufuellen
+zeller saarbruecken
+from authematik to automatic debugging
+
+
+Stateful Operations - are operators that remember informations over multiple events
+Event - a single piece of information from the stream
+Windows - in order to be able to count the total number of elements on the stream windows are created. As a stream is endless normally counting would be impossible, windows make t possible to count it in a specific timeframe
+Dataflows are either one to one or redistributing, which creates subtasks and splits those to different machines example: "map()"
+
+
+Flink - Distibuted Computing Framework
+4 Levels of Abstraction:
+    1. Base Stateful Streaming processing
+    2. DataSet/DataStream API (the Core API)
+    3. Table API (Declarative DSL)
+    4. SQL (High Level Language)
+
+Task: is an operation
+Subtask: a task is split into subtasks which are run as their own thread on the distibuted system. Subtask = Thread
+Job Manager: A single instance for the hole application (can have a backup), coordinates the distributed execution: schedule tasks, coordinate checkpoints, coordinate recovery on failures etc.
+Task Manager: The worker that executes the Subtasks. There has to be at least one. Task Managers connect to the Job Manager and wait for work(tasks). A Task Manager can have multiple slots for the execution of said subtasks and is itself a jvm process
+Checkpoints: A Snapshot of the running program that is saved in the state backend and  created periodicly, disposing of the previous one as a new one is created. Is done automaticly by Flink in case of program errors.
+Savepoints: Same as checkpoints just created by a user and wont be deleted once a new one is created.
