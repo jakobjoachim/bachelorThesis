@@ -22,3 +22,5 @@ Job Manager: A single instance for the hole application (can have a backup), coo
 Task Manager: The worker that executes the Subtasks. There has to be at least one. Task Managers connect to the Job Manager and wait for work(tasks). A Task Manager can have multiple slots for the execution of said subtasks and is itself a jvm process
 Checkpoints: A Snapshot of the running program that is saved in the state backend and  created periodicly, disposing of the previous one as a new one is created. Is done automaticly by Flink in case of program errors.
 Savepoints: Same as checkpoints just created by a user and wont be deleted once a new one is created.
+
+As this Thesis is based on the Flink Framework it is important to understand how Flink works and what kind of tools it already has integreted to help develop bug free software. The Flink Framework is a processing framework simular to Apache Spark or Apache Storm. I

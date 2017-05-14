@@ -1,3 +1,27 @@
-The goal of this section is to give an overview of work done by other people this thesis is based upon.
+The goal of this section is to give the necessary information to understand the rest of the thesis. Debugging is a complicated process that is made much harder by distributing the system to more than one physical location.
 
-As this Thesis is based on the Flink Framework it is important to understand how Flink works and what kind of tools it already has integreted to help develop bug free software. The Flink Framework is a processing framework simular to Apache Spark or Apache Storm. I
+\section{Flink Framework}
+\label{flinkFramework}
+
+Flink is a Framework for processing applications that are distributed across multiple computers. This part will lay out the foundations of the Flink Framework.
+Flink applications have a simple base structure that is used by the developer. Each application defines tasks which have a particular structure. Each task has an input and output stream. These are called source and sink. Because both the source and sink of these tasks are streams, they can be attached to each other thus creating a data flow from task to task until the wanted end state is reached.
+
+\begin{figure}[h!]
+    \centering
+      \includegraphics[width=0.9\textwidth]{rw_simpleDataflowInFlink.png}
+      \caption{"Simple Dataflow in Flink"}
+      \label{simpleDataflowInFlink}
+\end{figure}
+
+Figure \ref{simpleDataflowInFlink} shows a basic program flow. On the left side, it starts with a source. The source is then transferred over a data stream to the first task. The map operation is executed, and the result is sent over a data stream to the next task where the same procedure will start again. The resulting data in this example is the sink, meaning we reached the end of the program. The sink will typically be connected to a database or some other kind of Technology for preserving the data. The most basic option would be to write the sink onto the standard output on the console.
+
+Until now the system can only be distributed by having the different tasks on different physical computers. This distribution will not suffice when the amount of input data gets too high. To achieve real distribution in the application, each task can be run multiple times as so called subtasks. These subtasks run as a single thread in the JVM and are managed by a task manager. Task Manager connect to a Job Manager which coordinates the distributed execution. The data flow from one subtask to another can either be one to one or a redistributing data flow. A redistributing data flow is necessary to achieve an even distribution of data at the next subtasks.
+
+\begin{figure}[h!]
+    \centering
+      \includegraphics[width=0.9\textwidth]{rw_distributedDataflowInFlink.png}
+      \caption{"Distributed Dataflow in Flink"}
+      \label{distributedDataflowInFlink}
+\end{figure}
+
+Figure \ref{distributedDataflowInFlink} presents the same example as figure 1.1 just with the subtasks shown as well. The map task splits the data
