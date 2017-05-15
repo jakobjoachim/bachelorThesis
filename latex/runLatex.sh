@@ -27,4 +27,4 @@ function compile {
   texify
 }
 
-cd "out" && copyResourcesToOut && clear && compile && open thesis.pdf
+cd "out" && copyResourcesToOut && clear && compile

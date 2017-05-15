@@ -5,7 +5,7 @@ from authematik to automatic debugging
 
 Stateful Operations - are operators that remember informations over multiple events
 Event - a single piece of information from the stream
-Windows - in order to be able to count the total number of elements on the stream windows are created. As a stream is endless normally counting would be impossible, windows make t possible to count it in a specific timeframe
+Windows - in order to be able to count the total number of elements on the stream, windows are created. As a stream is endless normally counting would be impossible, windows make t possible to count it in a specific timeframe
 Dataflows are either one to one or redistributing, which creates subtasks and splits those to different machines example: "map()"
 
 
