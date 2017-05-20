@@ -2,7 +2,9 @@ The goal of this section is to give the necessary information to understand the 
 
 \section{Flink Framework}
 \label{flinkFramework}
+The Flink Framework is a stream processing framework for the JVM. It is written in java and scala and can be used with a variety of languages and technologies. As is to be expected the most supported languages are java and scala, although there is also a python wrapper and a few more available. The following section will clarify how exactly a Flink application works and what kind of debugging and logging tools it already has.
 
+\subsection{Basics}
 Flink is a Framework for processing applications that are distributed across multiple computers. This part will lay out the foundations of the Flink Framework.
 Flink applications have a simple base structure that is used by the developer. Each application defines tasks which have a particular structure. Each task has an input and output stream. These are called source and sink. Because both the source and sink of these tasks are streams, they can be attached to each other thus creating a data flow from task to task until the wanted end state is reached.
 
@@ -26,10 +28,29 @@ Until now the system can only be distributed by having the different tasks on di
 
 Figure \ref{distributedDataflowInFlink} presents the same example as figure \ref{simpleDataflowInFlink} just with the subtasks shown as well. The map task is a vital step in each application as it connects the data from each subtask with each other. It is easily understood be a simple example. In an application that counts how often each word is in a text, it would only split the text at each space symbol. The redistributing data flow would then create an even distribution in the next node which specifies what to count by (id task) and applies a particular aggregation function to the "apply" operation. The result is then sent to the sink operator. This explanation is a simplification of the actual MapReduce model. For a complete overview see \cite{todo}.
 
-\subsection{Stream vs. Batch}
+\subsection{Stream Processing and Batch Processing}
 
-Apache Flink is primarily a stream processing framework, although you can also use batch processing. As it makes a big difference in the infrastructure of the framework, it is important to lay out the differences between the two.
+Apache Flink is primarily a stream processing framework, although it can also be used for batch processing. As it makes a big difference in the infrastructure of the framework which process the primary one is, it is important to lay out the differences between the two.
 
 \paragraph{Stream Processing} uses as the names suggest a stream to acquire the data. A stream is an endless sequence of data that can be utilised both as an input and output. As there is no end, it makes it tough to use algorithms on it. Flink uses "Windows" to solve this problem. These windows offer a frame for the operations to only use data that was received in each window. Windows can be programmed and provide various ways to define the frame. The simplest way would be just to give a timeframe, but one could also build complex structures.
 
-\paragraph{Batch Processing} on the other hand has set boundaries, and it is evident how much data is sent and where it ends. To support batch processing as well in the Flink Framework the windows can be programmed to have the same size as the data you want to batch processed. That way even though Flink uses streams it still supports batch processing.
+\paragraph{Batch Processing} on the other hand has set boundaries, and it is evident how much data is sent and where it ends. To support batch processing as well in the Flink Framework the windows can be programmed to have the same size as the data in the batch. That way even though Flink uses streams it still supports batch processing.
+
+\subsection{Debbugging and Checkpoints}
+\label{debuggingAndCheckpoints}
+Flink comes with some tools that help the programmer debug his application and help prevent errors stopping the application. This section will highlight what Flink does different or on top of the regular java/scala debugging features.
+
+\subsubsection{Metrics}
+\label{metrics}
+In a distributed application it can be hard to find out why something is not working properly or why some function performs worse than expected. To help the programmer understand these problems Flink provides metrics, these count or measure throughput on specific points in the application and send this information to a reporter. The reporter provides the information to external applications so that the metrics can be analysed as needed. There are four different metric classes available, a counter that can be in- or decremented, a gauge that can provide a value of a particular variable, a histogram which measures the distribution of long values and a meter that measures the average throughput.
+
+As applications could have a huge number of metrics which would make it very hard to find anything, it is important to have some grouping mechanism. Flink provides scopes to solve this. There are two types of scopes, user-scopes, defined by the user, and system-scopes that hold current information about the system state like the task in which the metric was saved. When a metric is registered, an identifier and a system scope have to be specified, a user-scope can optionally be added.
+
+In addition to the metrics above, Flink automatically collects system information like ram usage, the number of threads, network usage and much more.
+
+\subsubsection{Checkpoints}
+\label{checkpoints}
+
+In distributed systems it is quite common that parts of the system crash, this can have many reasons, the incoming data could be formatted wrongly, a data transmission could break away before it is finished, etc.. Normally the application would log what went wrong and stop or restart the whole application. Depending on how large the application is this could cost a lot of money, flink creates checkpoints which it automatically falls back to if the application crashes. The way these checkpoints work is by periodically injecting barriers at the source. After a task receives a barrier at one of its inputs, it blocks that input until it received a barrier at all of its inputs. Once that happens it takes a snapshot of all the data it received since the last snapshot. This way it is guaranteed that every piece of information is part of a snapshot all the time. To keep these snapshots from taking up too much space on the hard drive flink only stores one snapshot for every task and overrides it with the next. For a more in-depth explanation of this algorithm see: \cite{DBLP:journals/corr/CarboneFEHT15}
+
+As well as these automated checkpoints flink provides user-created checkpoints called savepoints. These can be set by the user and are not getting deleted everytime a new one is created. They are used to pause the application for example.
