@@ -42,7 +42,7 @@ Flink comes with some tools that help the programmer debug his application and h
 
 \subsubsection{Metrics}
 \label{metrics}
-In a distributed application it can be hard to find out why something is not working properly or why some function performs worse than expected. To help the programmer understand these problems Flink provides metrics, these count or measure throughput on specific points in the application and send this information to a reporter. The reporter provides the information to external applications so that the metrics can be analysed as needed. There are four different metric classes available, a counter that can be in- or decremented, a gauge that can provide a value of a particular variable, a histogram which measures the distribution of long values and a meter that measures the average throughput.
+In a distributed application it can be hard to find out why something is not working properly or why some function performs worse than expected. To help the programmer understand these problems Flink provides metrics, these count or measure throughput on specific points in the application and send this information to a reporter. The reporter provides the information to external applications so that the metrics can be analysed as needed. There are four different metric classes available, a counter that can be in- or decremented, a gauge that can provide the value of a particular variable, a histogram which measures the distribution of long values and a meter that measures the average throughput.
 
 As applications could have a huge number of metrics which would make it very hard to find anything, it is important to have some grouping mechanism. Flink provides scopes to solve this. There are two types of scopes, user-scopes, defined by the user, and system-scopes that hold current information about the system state like the task in which the metric was saved. When a metric is registered, an identifier and a system scope have to be specified, a user-scope can optionally be added.
 
@@ -53,4 +53,27 @@ In addition to the metrics above, Flink automatically collects system informatio
 
 In distributed systems it is quite common that parts of the system crash, this can have many reasons, the incoming data could be formatted wrongly, a data transmission could break away before it is finished, etc.. Normally the application would log what went wrong and stop or restart the whole application. Depending on how large the application is this could cost a lot of money, flink creates checkpoints which it automatically falls back to if the application crashes. The way these checkpoints work is by periodically injecting barriers at the source. After a task receives a barrier at one of its inputs, it blocks that input until it received a barrier at all of its inputs. Once that happens it takes a snapshot of all the data it received since the last snapshot. This way it is guaranteed that every piece of information is part of a snapshot all the time. To keep these snapshots from taking up too much space on the hard drive flink only stores one snapshot for every task and overrides it with the next. For a more in-depth explanation of this algorithm see: \cite{DBLP:journals/corr/CarboneFEHT15}
 
-As well as these automated checkpoints flink provides user-created checkpoints called savepoints. These can be set by the user and are not getting deleted everytime a new one is created. They are used to pause the application for example.
+As well as these automated checkpoints Flink provides user-created checkpoints called savepoints. These can be set by the user and are not getting deleted everytime a new one is created. They are used to pause the application for example.
+
+
+\section{NameTodo}
+\label{todo}
+
+text todo
+
+\subsection{BigDebug: Debugging Primitives for Interactive Big Data Processing in Spark}
+
+\cite{Gulzar:2016:BDP:2884781.2884813}. The University of California built a debugger for "Apache Spark" which focuses on similar points as this thesis. The motivating intention behind their debugger is to find the cause of the problem easily without having to go through millions of logs, and without stopping the system itself. BigDebug uses five different methods to solve this predicament. This section will not only lay these methods out but also show if they are already present in Flink.
+
+\paragraph{Simulated Breakpoints} are used to debug parts of the application without stopping the running system in every node. This is done by spawning a new process with the same beginning states as the remote one. After that the newly spawned process can be debugged without intervening in the running system.
+
+\paragraph{On-Demand Watchpoints with Guard} are user-defined methods in the system that can be set to inspect the value of a certain variable, check that value and store it in case the value of the variable fails the check. This method can be useful in certain situations for example when checking a variable that is supposed to hold a zip code to see all values that are malformed. This feature can easily be used in the Flink Framework with the use of metrics.
+
+\paragraph{Crash Culprit and Remediation} focuses on two things, first collecting interesting data in case of a program error so that the user can easily find out why the crash happened and secondly avoid rerunning the whole application when a crash happens. These two are grouped together as they are solved together as well. After a crash, the user will get the value that was responsible for the error, for example, the input could have been "23s" instead of 23. The rest of the application will continue to work and once the user corrects the value to "23" the program reruns this task. In Flink, this is partly implemented, as Flink creates automated checkpoints the application will not completely stop when it crashes as it would be in Spark. Flink offers no way to modify values that lead to a program error though.
+
+\paragraph{Forward and Backwards Tracing} is done to make it possible to track where a piece of data came from or where it will end up. This tracing is quite complicated as a piece of data in task X is a sum of all modifications that occurred before that task. The way this is implemented is by tagging each incoming piece of data with a unique identifier and adding all the identifiers that are used to create a new piece of data together. On the other hand, if data is split into multiple pieces, like splitting a sentence into words, every new piece gets a new id, and the relation between the old and the new id is saved. That way a programmer can easily backtrace from where a malfunctioning piece of data originated.
+
+\paragraph{Fine-Grained Latency Alert} is used to identify which records are causing delay. Baseline Spark can already measure the time between each task. BigDebug builds on this feature and extends it by making it available at teach operator. This part is quite different in Flink as Flink offers no direct way to apply a metric to each task or operator.
+
+\subsubsection{Conclusion}
+todo
