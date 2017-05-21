@@ -51,7 +51,7 @@ In addition to the metrics above, Flink automatically collects system informatio
 \subsubsection{Checkpoints}
 \label{checkpoints}
 
-In distributed systems it is quite common that parts of the system crash, this can have many reasons, the incoming data could be formatted wrongly, a data transmission could break away before it is finished, etc.. Normally the application would log what went wrong and stop or restart the whole application. Depending on how large the application is this could cost a lot of money, flink creates checkpoints which it automatically falls back to if the application crashes. The way these checkpoints work is by periodically injecting barriers at the source. After a task receives a barrier at one of its inputs, it blocks that input until it received a barrier at all of its inputs. Once that happens it takes a snapshot of all the data it received since the last snapshot. This way it is guaranteed that every piece of information is part of a snapshot all the time. To keep these snapshots from taking up too much space on the hard drive flink only stores one snapshot for every task and overrides it with the next. For a more in-depth explanation of this algorithm see: \cite{DBLP:journals/corr/CarboneFEHT15}
+In distributed systems it is quite common that parts of the system crash, this can have many reasons, the incoming data could be formatted wrongly, a data transmission could break away before it is finished, and so forth. Normally the application would log what went wrong and stop or restart the whole application. Depending on how large the application is this could cost a lot of money, flink creates checkpoints which it automatically falls back to if the application crashes. The way these checkpoints work is by periodically injecting barriers at the source. After a task receives a barrier at one of its inputs, it blocks that input until it received a barrier at all of its inputs. Once that happens it takes a snapshot of all the data it received since the last snapshot. This way it is guaranteed that every piece of information is part of a snapshot all the time. To keep these snapshots from taking up too much space on the hard drive flink only stores one snapshot for every task and overrides it with the next. For a more in-depth explanation of this algorithm see: \cite{DBLP:journals/corr/CarboneFEHT15}
 
 As well as these automated checkpoints Flink provides user-created checkpoints called savepoints. These can be set by the user and are not getting deleted everytime a new one is created. They are used to pause the application for example.
 
@@ -77,3 +77,27 @@ text todo
 
 \subsubsection{Conclusion}
 todo
+
+\subsection{Debugging Distributed Systems}
+\label{debuggingDistributedSystems}
+
+\cite{Beschastnikh:2016:DDS:2927299.2940294}: tries to lay out fundamental challenges developer face when building distributed systems and how to solve them.
+
+They give an overview of seven approaches that can help build, validate and debug distributed systems. What follows is a summary of the seven methods.
+
+\paragraph{Testing} is crucial but can only help reveal some errors as testing every piece of the application is impossible.
+
+\paragraph{Model Checking} is a form of testing that automates the testing process somewhat by checking every possible input up to some upper bound in a predefined way. The way the model checker works depends completely on the model checker itself, as there are a lot of different options available. There are for example symbolic model checkers available that explore possible executions mathematically, or black box test that just run the application with various inputs. Model checking can be helpful as it can cover much more ground than manually written tests, as well as check parts of the application developers, might not have thought about.
+
+\paragraph{Theorem proving} is a mathematical method of proving that the distributed system is free of defects even before writing a single line of code. It is mostly used for proving that the core of a new application is bug-free before spending lots of time building an application that might not work properly.
+
+\paragraph{Record and Replay} is a method for analysing a single execution of the application to gain insight into why an error occurs in a system that has non-deterministic events, as these change every time the program is run even with if the same input values are used.
+
+\paragraph{Tracing} tracing is the method of following data through a system. It has the same goal as Record and Replay have although it is easier to understand what is happening as only a subset of the data is shown.
+
+\paragraph{Log analysis} is a method for debugging black-box systems as it has the same features as all the other methods. It is done by applying algorithms to the logs to find bugs that are not easy to spot.
+
+\paragraph{Visulization} is used to make distributed systems more transparent. If a developer has a good visual representation of his work, it is much easier for him to find bad design choices that could lead to bugs.
+
+\subsubsection{Conclusion}
+The article lays a good foundation of steps to use in a distributed environment giving examples of who uses each step and how successful they were with it.
