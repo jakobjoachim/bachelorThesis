@@ -11,3 +11,5 @@ paxos algo
 
 add hadoop yarn compatibility to the flink chapter.
 it is possible to use the java remote debugger from an ide
+
+Debugging Kapitel hinzufuegen, related work ueberarbeiten wie besprochen, start richtiges Kapitel.
