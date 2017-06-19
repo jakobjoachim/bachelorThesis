@@ -1,0 +1,29 @@
+Flink applications are very complex Java or Scala programs that still share a lot of the characteristics of typical Java programs. As such most methods of debugging Java still apply to Flink and should be used. This chapter will outline some of the ways that help Java developers to find their bugs faster and with less of a hassle.
+
+\section{Basics of the Java Debugger}
+
+To understand how the java debugger works we have to first look at how Java runs applications. Java applications run on the JVM, the Java virtual machine, to gain access to the information of the running program, the virtual machine needs to be reachable. Java provides interfaces for these communications, in general, the IDE implements the Java Debug Interface (JDI), and the JVM Software implements the JVM Tool Interface (JVM TI). To allow communications between the two interfaces, a Protocol is necessary as the two interfaces are not running on the same (virtual) system. Java uses the Java Debug Wire Protocol (JDWP) for that, which specifies which byte holds which information on the byte stream. When launching an application in the "debug" mode, the IDE also starts a JVM TI alongside the application in the JVM and provides the JVM TI with the breakpoint locations. These breakpoints can either be line numbers or method heads that only trigger when reaching that precise method. Once the program hits the particular method (or line), the JVM TI stops the application and notifies the JDI. In general, IDEs provide information about the state of relevant variables; this is done by the IDE itself as it has to send a request to the JVM TI for each variable the user might want to see.
+
+\section{Debugging Principles}
+
+There are a few simple principles that help not only to find errors in the code easier, but also to make sure that similar errors won't occur in the future. This section will lay out some of these principles.
+
+\subsection{Debugging Mindset}
+The mindset plays a significant role in debugging; often developers see debugging as an annoyance and try to get away from it as fast as possible. Although it is the goal of good debugging to minimise the time a developer spends on it, it should be seen as a way to learn something about why the error occurred in the first place. This learning reduces the time he has to spend searching for a similar mistake later on.
+
+\subsection{The Programmers Fault}
+Another important step is to understand that it's most probably the developer's fault when an error occurs. Thus the programmer should always first look into his code to find the bug, only if that fails he should start looking into other possible reasons. It is a common mistake not to recognise one's fault and should always be considered when debugging.
+
+\subsection{Last Change}
+Often the error occurs at a piece of code that is not responsible for the error itself. \cite{Zeller:2009:WPF:1718010} describes program errors as follows:
+\begin{enumerate}
+  \item A programmer creates a defect in the code.
+  \item The defect causes an infection.
+  \item The infection spreads
+  \item The infection causes a failure
+\end{enumerate}
+
+It is often best to first look at the last change that was made in the code, as the failure probably originated there. Obviously, that doesn't always have to be true, as there are multiple other reasons why the failure only just now got discovered.
+
+\section{Conclusion}
+It is important to note that this section was merely a refresher on debugging and is not enough to understand it in its completeness. For further information on the topic consider reading \cite{Zeller:2009:WPF:1718010}. The book covers the subject of debugging much more in depth.
