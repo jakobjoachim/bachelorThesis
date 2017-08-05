@@ -1,0 +1,65 @@
+As debugging of traditional programs is in many ways similar to debugging Flink applications it is necessary to explore what good debugging is. This chapter is an accumulation of techniques and methods that many people consider essential to debug effectively.
+
+\section{Why Programs Fail}
+This section will examine the "TRAFFIC" method of debugging that is published in \cite{Zeller:2009:WPF:1718010}'s book "Why Programs Fail". It consists of seven steps that lead to a quick removal of the failure while still preserving the information on how the failure came to be as a big part of debugging is not to fix a failure but to make sure that the same or a similar failure won't happen again.
+The seven steps are:
+\begin{enumerate}
+  \item Track the problem in the Database
+  \item Reproduce the failure
+  \item Automate and simplify the test case
+  \item Find possbile infection origins
+  \item Focus on the most likely origins
+  \item Isolate the infection in the chain
+  \item Correct the defect
+\end{enumerate}
+
+The following subsections will give an overview of what each step does.
+
+\subsection{Track}
+\label{aodZellerTrack}
+Tracking is not the first step, but a good method at each step, logging what happened so that anybody involved knows how far each problem was investigated. It is started once someone finds a problem. Put simply tracking is holding the information on what the problem is and how close the developer is to fix it. This is mostly done on a platform that is accessible for all involved parties to make the communication between the user and the developer easier. This platform is only useful when used permanently as out of date information is more harmful than useful. Most software projects have multiple people working on them, not all of them know every bit of the program. This adds complexity to an already complicated process. It is necessary to split the work to different developers andd this process has to be logged otherwise problem reports might get lost. A developer might have 20 problem reports on his desk of which he only knows how to solve a few. Other reported problems might not even be problems, but a wanted state. For example, someone might report that a password field is showing only stars instead of the letters he put in. As this (for the developer) is a security feature, it will not be changed and has to be logged or noted so that the same problem will hopefully not be reported again. To solve these and other issues tracking should be used. Depending on the application these metrics are useful:
+\begin{enumerate}
+  \item The State of the Problem - Is the problem new, assigned to a developer,
+resolved, closed, etc. This is useful for the developer as he can easily see which problems he has to work on and which are already solved. It is also beneficial for the user as he can easily see when his problem is resolved.
+  \item The Resolution - Is the problem fixed, invalid, won't be fixed (as the example above), a duplicate, etc. This is useful as it lets the user see to which conclusion the developer came.
+  \item Assigned Developer -  Which developer is assigned to the problem. Makes it easy to communicate with the correct person and lets people know that the problem is worked on.
+  \item Severity - Is the problem crucial or is it only a minor inconvenience. Helps the developer prioritise which problems to solve first.
+\end{enumerate}
+
+These are just the most important once, depending on the project more should be added.
+
+\subsection{Reproduce}
+\label{aodZellerReproduce}
+The first real step in any debugging activity is to consistently reproduce the problem described in the problem report. This has two important reasons:
+
+\begin{enumerate}
+  \item To observe the problem - The developer has to be able to reproduce the problem to fix it, the developer could also check the source code at a position he thinks could be responsible for the problem without reproducing it, but that makes it unnecessarily hard on the developer as a good problem report should be re-creatable.
+  \item To check whether the problem is fixed - It is incredibly hard to tell in most situations if a problem is solved or not without being able to rerun the problem without it happening.
+\end{enumerate}
+
+Reproducing a problem can be incredibly hard, as the problem is rarely found by the person that has to fix it, but by a person who doesn't understand how the program works. This makes it difficult for both the finder and the fixer of the problem, as the finder doesn't know which information the fixer might need, and for the fixer as he can only reproduce it with the corresponding information.
+
+Reproducing is done by going through the following three steps until the problem can be reproduced:
+\begin{enumerate}
+  \item Reproduce the Problem locally - In the best case scenario, the problem can be replicated on the local machine of the developer fixing it with the information provided by the problem report. This is most successful when the problem state is not connected with many other choices in the program. For example, a button might not work (as reported in the problem report) that starts some function no matter what else happened before the button was pressed.
+  \item Adopt more Circumstances of the Problem environment - Sometimes the problem can not be reproduced by only following the steps provided by the problem report. In that case, it is necessary to check what else is known about the environment the problem was found in. This means installing the same version of depending software, using the same configuration file, using the same hardware or anything else that could influence the described problem.
+  \item Contact the Problem Finder or declare the Problem invalid - If the reproduction failed even with all circumstances applied as outlined in the problem report, there are only two options left. Either the problem is not real, or the finder has not provided the necessary information. Depending on the bug this can be solved by contacting the finder and asking him for more details. It is beneficial for the developer to see the problem live, so it would be a good option to remotely gain access to the computer of the finder or get a video meeting with him. This is obviously not possible or feasible in many situations but extremely helpful if it can be arranged.
+\end{enumerate}
+
+At this point, it is important to mark what information were necessary, so that another developer can reproduce the problem easier as well as saving the information as it is not guaranteed that the problem will be solved immediately. This is done with tracking: see \ref{aodZellerTrack}
+
+\subsection{Automate}
+Once the problem is reproduced, it is desired to simplify the problem so that it can be replicated by a test case that as well as confirming that the problem is solved, helps avoid building a similar problem at a later time.
+
+Simplification is done by understanding what the root of the problem is. When the problem occurs when pressing a particular button, but the button has no context to other set states of the program it is safe to assume that actions done before the button click can be omitted. Thus leaving only the test case: After button press, function x started? This statement can now be easily modelled by a test case.
+
+The simplification is not only essential for building test cases but also helpful for the developer when trying to locate the problem in the code as it is much easier to find the error when only looking at the relevant pieces of source code.
+
+\paragraph{Why write tests?}
+It is understandable to ask why to write a test when it is already known where the bug is originating from. The developer only has to fix the problem and manually test the program once, what good is a test case here?
+It is important to understand that finding a problem is giving a lot of valuable information to the developer he might not even realise. We can assume that if the problem got into the code once it might get into the code again. The only way to make sure it does not is to give the developer an imidiate feedback when the problem occurs again. As well as helping the Developer in the future it can assist the developer while writing the fix to quickly test if the fix worked or not without having to manually start the application and reproduce the problem all over again.
+
+\subsection{Find}
+\subsection{Focus}
+\subsection{Isolate}
+\subsection{Correct}
