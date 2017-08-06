@@ -1,5 +1,19 @@
 As debugging of traditional programs is in many ways similar to debugging Flink applications it is necessary to explore what good debugging is. This chapter is an accumulation of techniques and methods that many people consider essential to debug effectively.
 
+\section{Word Count Application}
+\label{wordCountApplication}
+This section quickly outlines the "Word Count Application" that is used in the thesis as an example. The Application counts how often each word is in a spcific text and returns the results to the command line. An example run of the program would be:
+
+\begin{lstlisting}
+  $ java -jar wordCountSimple.jar "Hello hello how do you do"
+  how: 1
+  hello: 2
+  do: 2
+  you: 1
+\end{lstlisting}
+
+Note that the application ignores capital letters in the input. This will be relevant later on.
+
 \section{Why Programs Fail}
 This section will examine the "TRAFFIC" method of debugging that is published in \cite{Zeller:2009:WPF:1718010}'s book "Why Programs Fail". It consists of seven steps that lead to a quick removal of the failure while still preserving the information on how the failure came to be as a big part of debugging is not to fix a failure but to make sure that the same or a similar failure won't happen again.
 The seven steps are:
@@ -13,9 +27,9 @@ The seven steps are:
   \item Correct the defect
 \end{enumerate}
 
-The following subsections will give an overview of what each step does.
+The following subsection explaines each step of the method along the example program outlines above \ref{wordCountApplication}
 
-\subsection{Track}
+\subsection{Track the problem in the Database}
 \label{aodZellerTrack}
 Tracking is not the first step, but a good method at each step, logging what happened so that anybody involved knows how far each problem was investigated. It is started once someone finds a problem. Put simply tracking is holding the information on what the problem is and how close the developer is to fix it. This is mostly done on a platform that is accessible for all involved parties to make the communication between the user and the developer easier. This platform is only useful when used permanently as out of date information is more harmful than useful. Most software projects have multiple people working on them, not all of them know every bit of the program. This adds complexity to an already complicated process. It is necessary to split the work to different developers andd this process has to be logged otherwise problem reports might get lost. A developer might have 20 problem reports on his desk of which he only knows how to solve a few. Other reported problems might not even be problems, but a wanted state. For example, someone might report that a password field is showing only stars instead of the letters he put in. As this (for the developer) is a security feature, it will not be changed and has to be logged or noted so that the same problem will hopefully not be reported again. To solve these and other issues tracking should be used. Depending on the application these metrics are useful:
 \begin{enumerate}
@@ -28,7 +42,7 @@ resolved, closed, etc. This is useful for the developer as he can easily see whi
 
 These are just the most important once, depending on the project more should be added.
 
-\subsection{Reproduce}
+\subsection{Reproduce the failure}
 \label{aodZellerReproduce}
 The first real step in any debugging activity is to consistently reproduce the problem described in the problem report. This has two important reasons:
 
@@ -48,7 +62,7 @@ Reproducing is done by going through the following three steps until the problem
 
 At this point, it is important to mark what information were necessary, so that another developer can reproduce the problem easier as well as saving the information as it is not guaranteed that the problem will be solved immediately. This is done with tracking: see \ref{aodZellerTrack}
 
-\subsection{Automate}
+\subsection{Automate and simplify the test case}
 Once the problem is reproduced, it is desired to simplify the problem so that it can be replicated by a test case that as well as confirming that the problem is solved, helps avoid building a similar problem at a later time.
 
 Simplification is done by understanding what the root of the problem is. When the problem occurs when pressing a particular button, but the button has no context to other set states of the program it is safe to assume that actions done before the button click can be omitted. Thus leaving only the test case: After button press, function x started? This statement can now be easily modelled by a test case.
@@ -57,9 +71,14 @@ The simplification is not only essential for building test cases but also helpfu
 
 \paragraph{Why write tests?}
 It is understandable to ask why to write a test when it is already known where the bug is originating from. The developer only has to fix the problem and manually test the program once, what good is a test case here?
-It is important to understand that finding a problem is giving a lot of valuable information to the developer he might not even realise. We can assume that if the problem got into the code once it might get into the code again. The only way to make sure it does not is to give the developer an imidiate feedback when the problem occurs again. As well as helping the Developer in the future it can assist the developer while writing the fix to quickly test if the fix worked or not without having to manually start the application and reproduce the problem all over again.
+It is important to understand that finding a problem is giving a lot of valuable information to the developer he might not even realise. We can assume that if the problem got into the code once it might get into the code again. The only way to make sure it does not, is to give the developer an imidiate feedback when the problem occurs again. As well as helping the Developer in the future it can assist the developer while writing the fix to quickly test if the fix worked or not without having to manually start the application and reproduce the problem all over again.
 
-\subsection{Find}
-\subsection{Focus}
-\subsection{Isolate}
-\subsection{Correct}
+\lstinputlisting[language=Java]{WordCountBug.java}
+
+\subsection{Find possbile infection origins}
+Once the failure can be reproduced easily, it is time to search for what part of the code is responsible for the failure. This is often the hardest part of debugging. To make finding easier for the developer the traffic approach suggests to use backtracking to find the relevant piece of code. Backtracking is done by starting at the manifestation of the error, meaning if the program fails with an exception, the line noted in the exception is used as a start point. If the program just produces an unwanted or wrong value, the line is used where that value was returned. Once a starting point is found the next step is to back track all active and passive usages of the variable. Lines that don't use the Variable can be omitted as they cannot be responsible for the failure. The information gained by this technique should be displayed by a control flow graph to make them easier to understand.
+
+
+\subsection{Focus on the most likely origins}
+\subsection{Isolate the infection in the chain}
+\subsection{Correct the defect}

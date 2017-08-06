@@ -4,17 +4,6 @@ The goal of this section is to give the necessary information to understand the 
 \label{flinkFramework}
 The Flink Framework is a stream processing framework for the JVM. It is written in java and scala and can be used with a variety of languages and technologies. As is to be expected the most supported languages are java and scala, although there is also a python wrapper and a few more available. The following section will clarify how exactly a Flink application works and what kind of debugging and logging tools it already has.
 
-\subsection{Word Count Application}
-This section quickly outlines the example Application that will be used in this chapter. The "Word Count Application" is a simple program that counts how often each word occurs in a given text. dty
-\begin{lstlisting}
-$ java -jar wordCountSimple.jar "Hello Hello how do you do"
-how: 1
-Hello: 2
-do: 2
-you: 1
-\end{lstlisting}
-For example the input "Hello Hello how do you do" would return Hello - 2, do - 2, how - 1 and you - 1. Depending on the implementation of the program this seemingly simple program can have some unwanted side effects. Some of these will be explored later in the \ref{DebuggingBasics} chapter.
-
 \subsection{Basics}
 Flink is a Framework for processing applications that are distributed across multiple computers. This part will lay out the foundations of the Flink Framework.
 Flink applications have a simple base structure that is used by the developer. Each application defines tasks which have a particular structure. Each task has an input and output stream. These are called source and sink. Because both the source and sink of these tasks are streams, they can be attached to each other thus creating a data flow from task to task until the wanted end state is reached.

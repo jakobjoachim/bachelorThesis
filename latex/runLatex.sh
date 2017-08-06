@@ -13,6 +13,7 @@ function copyResourcesToOut {
   cp -r ../logo .
   cp -r ../images/*.png .
   cp ../*.tex .
+  cp -r ../programs/*/*.java .
 }
 
 function texify {
