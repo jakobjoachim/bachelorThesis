@@ -1,0 +1,18 @@
+Intro
+
+The Art of Debugging
+  Basics of the Java Debugger
+  The Traffic Approach
+
+Related Work
+  The Flink Framework
+  Similar Work
+    Big Debug
+    Debugging Distributed Systems
+
+My Method for Debugging Flink
+  while programming
+  # Flink much harder, no user to give info on reproduction, some problems cant be reproduced locally, some are input data specific.
+    theorem proving
+    # can be used to eliminate design flaws, only useful in extremy large and/or long living applications
+    

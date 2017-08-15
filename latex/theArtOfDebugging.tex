@@ -14,24 +14,57 @@ This section quickly outlines the "Word Count Application" that is used in the t
 
 Note that the application ignores capital letters in the input. This will be relevant later on.
 
+\section{The Java Debugger}
+
+Flink applications are very complex Java or Scala programs that still share a lot of the characteristics of typical Java programs. As such most methods of debugging Java still apply to Flink and should be used. This chapter will outline some of the ways that help Java developers to find their bugs faster and with less of a hassle.
+
+\subsection{Basics of the Java Debugger}
+
+To understand how the java debugger works we have to first look at how Java runs applications. Java applications run on the JVM, the Java virtual machine, to gain access to the information of the running program, the virtual machine needs to be reachable. Java provides interfaces for these communications, in general, the IDE implements the Java Debug Interface (JDI), and the JVM Software implements the JVM Tool Interface (JVM TI). To allow communications between the two interfaces, a Protocol is necessary as the two interfaces are not running on the same (virtual) system. Java uses the Java Debug Wire Protocol (JDWP) for that, which specifies which byte holds which information on the byte stream. When launching an application in the "debug" mode, the IDE also starts a JVM TI alongside the application in the JVM and provides the JVM TI with the breakpoint locations. These breakpoints can either be line numbers or method heads that only trigger when reaching that precise method. Once the program hits the particular method (or line), the JVM TI stops the application and notifies the JDI. In general, IDEs provide information about the state of relevant variables; this is done by the IDE itself as it has to send a request to the JVM TI for each variable the user might want to see.
+
+\subsection{Debugging Principles}
+
+There are a few simple principles that help not only to find errors in the code easier, but also to make sure that similar errors won't occur in the future. This section will lay out some of these principles.
+
+\subsubsection{Debugging Mindset}
+The mindset plays a significant role in debugging; often developers see debugging as an annoyance and try to get away from it as fast as possible. Although it is the goal of good debugging to minimise the time a developer spends on it, it should be seen as a way to learn something about why the error occurred in the first place. This learning reduces the time he has to spend searching for a similar mistake later on.
+
+\subsubsection{The Programmers Fault}
+Another important step is to understand that it's most probably the developer's fault when an error occurs. Thus the programmer should always first look into his code to find the bug, only if that fails he should start looking into other possible reasons. It is a common mistake not to recognise one's fault and should always be considered when debugging.
+
+\subsubsection{Last Change}
+Often the error occurs at a piece of code that is not responsible for the error itself. \cite{Zeller:2009:WPF:1718010} describes program errors as follows:
+\begin{enumerate}
+  \item A programmer creates a defect in the code.
+  \item The defect causes an infection.
+  \item The infection spreads
+  \item The infection causes a failure
+\end{enumerate}
+
+It is often best to first look at the last change that was made in the code, as the failure probably originated there. Obviously, that doesn't always have to be true, as there are multiple other reasons why the failure only just now got discovered.
+
+\subsection{Conclusion}
+It is important to note that this section was merely a refresher on debugging and is not enough to understand it in its completeness. For further information on the topic consider reading \cite{Zeller:2009:WPF:1718010}. The book covers the subject of debugging much more in depth.
+
+
 \section{Why Programs Fail}
-This section will examine the "TRAFFIC" method of debugging that is published in \cite{Zeller:2009:WPF:1718010}'s book "Why Programs Fail". It consists of seven steps that lead to a quick removal of the failure while still preserving the information on how the failure came to be as a big part of debugging is not to fix a failure but to make sure that the same or a similar failure won't happen again.
+This section will examine the "TRAFFIC" method of debugging that is published in \cite{Zeller:2009:WPF:1718010}'s book "Why Programs Fail". It consists of seven steps that lead to a quick removal of the failure while still preserving the information on how the failure came to be, as a big part of debugging is not to fix a failure but to make sure that the same or a similar failure won't happen again.
 The seven steps are:
 \begin{enumerate}
   \item Track the problem in the Database
   \item Reproduce the failure
   \item Automate and simplify the test case
-  \item Find possbile infection origins
+  \item Find possible infection origins
   \item Focus on the most likely origins
   \item Isolate the infection in the chain
   \item Correct the defect
 \end{enumerate}
 
-The following subsection explaines each step of the method along the example program outlines above \ref{wordCountApplication}
+The following subsection explains each step of the method along the example program outlines above \ref{wordCountApplication}
 
 \subsection{Track the problem in the Database}
 \label{aodZellerTrack}
-Tracking is not the first step, but a good method at each step, logging what happened so that anybody involved knows how far each problem was investigated. It is started once someone finds a problem. Put simply tracking is holding the information on what the problem is and how close the developer is to fix it. This is mostly done on a platform that is accessible for all involved parties to make the communication between the user and the developer easier. This platform is only useful when used permanently as out of date information is more harmful than useful. Most software projects have multiple people working on them, not all of them know every bit of the program. This adds complexity to an already complicated process. It is necessary to split the work to different developers andd this process has to be logged otherwise problem reports might get lost. A developer might have 20 problem reports on his desk of which he only knows how to solve a few. Other reported problems might not even be problems, but a wanted state. For example, someone might report that a password field is showing only stars instead of the letters he put in. As this (for the developer) is a security feature, it will not be changed and has to be logged or noted so that the same problem will hopefully not be reported again. To solve these and other issues tracking should be used. Depending on the application these metrics are useful:
+Tracking is not the first step, but a good method at each step, logging what happened so that anybody involved knows how far each problem was investigated. It is started once someone finds a problem. Put simply tracking is holding the information on what the problem is and how close the developer is to fix it. This is mostly done on a platform that is accessible for all involved parties to make the communication between the user and the developer easier. This platform is only useful when used permanently as out of date information is more harmful than useful. Most software projects have multiple people working on them, not all of them know every bit of the program. This adds complexity to an already complicated process. It is necessary to split the work to different developers and this process has to be logged otherwise problem reports might get lost. A developer might have 20 problem reports on his desk of which he only knows how to solve a few. Other reported problems might not even be problems, but a wanted state. For example, someone might report that a password field is showing only stars instead of the letters he put in. As this (for the developer) is a security feature, it will not be changed and has to be logged or noted so that the same problem will hopefully not be reported again. To solve these and other issues tracking should be used. Depending on the application these metrics are useful:
 \begin{enumerate}
   \item The State of the Problem - Is the problem new, assigned to a developer,
 resolved, closed, etc. This is useful for the developer as he can easily see which problems he has to work on and which are already solved. It is also beneficial for the user as he can easily see when his problem is resolved.
@@ -51,7 +84,7 @@ The first real step in any debugging activity is to consistently reproduce the p
   \item To check whether the problem is fixed - It is incredibly hard to tell in most situations if a problem is solved or not without being able to rerun the problem without it happening.
 \end{enumerate}
 
-Reproducing a problem can be incredibly hard, as the problem is rarely found by the person that has to fix it, but by a person who doesn't understand how the program works. This makes it difficult for both the finder and the fixer of the problem, as the finder doesn't know which information the fixer might need, and for the fixer as he can only reproduce it with the corresponding information.
+Reproducing a problem can be incredibly hard, as the problem is rarely found by the person that has to fix it, but by an individual who doesn't understand how the program works. This makes it difficult for both the finder and the fixer of the problem, as the finder doesn't know which information the fixer might need, and for the fixer as he can only reproduce it with the corresponding information.
 
 Reproducing is done by going through the following three steps until the problem can be reproduced:
 \begin{enumerate}
@@ -71,14 +104,46 @@ The simplification is not only essential for building test cases but also helpfu
 
 \paragraph{Why write tests?}
 It is understandable to ask why to write a test when it is already known where the bug is originating from. The developer only has to fix the problem and manually test the program once, what good is a test case here?
-It is important to understand that finding a problem is giving a lot of valuable information to the developer he might not even realise. We can assume that if the problem got into the code once it might get into the code again. The only way to make sure it does not, is to give the developer an imidiate feedback when the problem occurs again. As well as helping the Developer in the future it can assist the developer while writing the fix to quickly test if the fix worked or not without having to manually start the application and reproduce the problem all over again.
+It is important to understand that finding a problem is giving a lot of valuable information to the developer he might not even realise. We can assume that if the problem got into the code once it might get into the code again. The only way to make sure it does not is to give the developer an immediate feedback when the problem occurs again. As well as helping the Developer in the future it can assist the developer while writing the fix to quickly test if the fix worked or not without having to manually start the application and reproduce the problem all over again.
 
 \lstinputlisting[language=Java]{WordCountBug.java}
 
-\subsection{Find possbile infection origins}
-Once the failure can be reproduced easily, it is time to search for what part of the code is responsible for the failure. This is often the hardest part of debugging. To make finding easier for the developer the traffic approach suggests to use backtracking to find the relevant piece of code. Backtracking is done by starting at the manifestation of the error, meaning if the program fails with an exception, the line noted in the exception is used as a start point. If the program just produces an unwanted or wrong value, the line is used where that value was returned. Once a starting point is found the next step is to back track all active and passive usages of the variable. Lines that don't use the Variable can be omitted as they cannot be responsible for the failure. The information gained by this technique should be displayed by a control flow graph to make them easier to understand.
-
+\subsection{Find possible infection origins}
+Once the failure can be reproduced easily, it is time to search for what part of the code is responsible for the failure. This is often the hardest part of debugging. To make finding easier for the developer the traffic approach suggests to use backtracking to find the relevant piece of code. Backtracking is done by starting at the manifestation of the error, meaning if the program fails with an exception, the line noted in the exception. If the program just produces an unwanted or wrong value, the line is used where that value was returned. Once a starting point is found the next step is to back track all active and passive usages of the variable. As failures can quickly propagate through the application it unfortunately not enough to only look at the variable that was causing the exception we have to also look at all other variables that interact with the first variable and so on. Lines that don't use the variable can be omitted as they cannot be responsible for the failure.  The information gained by this technique should be displayed by a control flow graph to make them easier to understand. The graph can often be omitted but should be used once the problem space gets too big to handle without a graph.
 
 \subsection{Focus on the most likely origins}
+Once the control flow graph is done, the developer should look at the most likely sources. This can be quite difficult as it is subjective to the developer what the most likely origins are. Some places to check can be:
+\begin{enumerate}
+  \item Last Change in the Application - Often problems occur after a change in the software thus it is very likely that problem is a result of the modification. It is, of course, possible that the problem was there before but got propagated through the new piece of code. In that case, it still makes sense to look into the new code.
+  \item Check for common problems in the framework - when working with a framework or any other software it is a good idea to check if the problem is related to the framework and has been solved by other people already.
+\end{enumerate}
+If both suggestions don't work out, it should be thought about where the program is the most complex as a developer is more likely to make a mistake in a complicated part than a simple one.
+
 \subsection{Isolate the infection in the chain}
+Isolating is done by creating a hypothesis and checking if it is true, then repeating the process until the problem is solved. A sample run would be:
+\begin{enumerate}
+  \item Hypothesis - The application creates a faulty value.
+  \item Prediction - The faulty value is set to the particular variable in the expected line.
+  \item Experiment - Using the debugger the prediction is confirmed.
+  \item Observation - The faulty value is set to the variable.
+  \item Conclusion - The hypothesis is confirmed.
+\end{enumerate}
+As the problem is not located yet a new hypothesis needs to be thought of. It is common to check if the failure is present at an earlier stage.
+\begin{enumerate}
+  \item Hypothesis - The infection does not occur until function Y is called
+  \item Prediction - The variable should hold a sane value before Y is called
+  \item Experiment - Using the debugger the prediction is confirmed
+  \item Observation - The variable is already wrong
+  \item Conclusion - The hypothesis is rejected
+\end{enumerate}
+As the infection is already present at the function call, the function should be examined
+\begin{enumerate}
+  \item Hypothesis - Invocation of function Y with the faulty value causes the problem
+  \item Prediction - If the function is called with the correct value the program runs correctly
+  \item Experiment - Using the debugger the function call is called with a correct value
+  \item Observation - The program runs correctly
+  \item Conclusion - The hypothesis is confirmed
+\end{enumerate}
+This method has to be repeated until the root of the problem is discovered. The advantage of this method is that the problem will be discovered eventually as more and more possible causes are getting removed.
+
 \subsection{Correct the defect}

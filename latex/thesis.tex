@@ -81,20 +81,19 @@
 \makenomenclature
 
 \begin{document}
-\selectlanguage{ngerman}
+\selectlanguage{english}
 
 %%%%%
 %% customize (see readme.pdf for supported values)
-\HAWThesisProperties{Author={Moritz Mustermann}
-                    ,Title={Softwareentwicklung im Gro�en und Ganzen	}
-                    ,EnglishTitle={Developing software in Germany}
+\HAWThesisProperties{Author={Jakob Joachim}
+                    ,Title={Methodology for Debugging Flink Applications}
+                    ,EnglishTitle={Methodology for Debugging Flink Applications}
                     ,ThesisType={Bachelorarbeit}
-                    ,ExaminationType={Bachelorpr�fung}
+                    ,ExaminationType={Bachelorprüfung}
                     ,DegreeProgramme={Bachelor of Science Angewandte Informatik}
-                    ,ThesisExperts={Prof. Dr. Erstpr�fer \and Prof. Dr. Zweitpr�fer}
+                    ,ThesisExperts={Prof. Dr. Olaf Zukunft \and Prof. Dr. Klaus-Peter Kossakowski}
                     ,ReleaseDate={1. Januar 2345}
-                  }
-
+                    }
 %% title
 \frontmatter
 
@@ -107,7 +106,7 @@
 %% note: this is one command on multiple lines
 \HAWAbstractPage
 %% German abstract
-{Schl�sselwort 1, Schl�sselwort 2}%
+{Schluesselwort 1, Schluesselwort 2}%
 {Dieses Dokument \ldots}
 %% English abstract
 {keyword 1, keyword 2}%
@@ -128,16 +127,16 @@
 \onehalfspacing
 %% write to the log/stdout
 \typeout{===== File: chapter 1}
-\chapter{Debugging Java}
-  \input{debuggingJava.tex}
-
-\typeout{===== File: chapter 2}
 \chapter{The Art of Debugging}
   \input{theArtOfDebugging.tex}
 
-\typeout{===== File: chapter 3}
+\typeout{===== File: chapter 2}
 \chapter{Related Work}
   \input{relatedWork.tex}
+
+\typeout{===== File: chapter 3}
+\chapter{Debugging Flink}
+  \input{methodForDebuggingFlink.tex}
 
 %% appendix if used
 %%\appendix
