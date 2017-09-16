@@ -19,7 +19,7 @@ To take full advantage of these features and also make the program easily debugg
 The modulation of the program not only helps to achieve the advantages of the framework but also supports with debugging later as a lot of the information needed are gathered at the checkpoints.
 
 \subsubsection{Where to split the program}
-It should now be understood that the program should be divided into multiple tasks, the next question now is how to break the program to get a simple program where there are enough tasks but not too many as too many would lead to the opposite effect we want to achieve.
+It should now be understandable that the programs should be divided into multiple tasks, the next question now is how to break the program to get a simple program where there are enough tasks but not too many as too many would lead to the opposite effect we want to achieve.
 
 \paragraph{Why are too many tasks bad?} When there are too many tasks, it gets even more complicated than when everything would be in its task as basically every line of code would be in a different place. Additionally, it wouldn't increase the performance as each task has some initialisation work that would diminish the performance gain achieved by distributing it perfectly.
 
@@ -28,6 +28,19 @@ It makes sense to use the Unix philosophy of having one task do one thing. In mo
 \subsection{Metrics}
 Now that the architecture of the program is done the next question is what metrics to use in which positions to achieve the optimal security.
 
-Once the program architecture is finished, it makes sense to think about what kind of metrics can be used where. Metrics are used to monitor the program without having to debug it and are crucial in notifying the developer if something looks wrong. The first is figuring out where to use metrics is to look at the application in the worst possible way, where is it most likely that an error will occur, after that it makes sense to surround the area with metrics that will catch and log the gathered data. Another great location for metrics is at positions where the through coming data is simple, and metrics can easily be implemented. All
+Once the program architecture is finished, it makes sense to think about what kind of metrics can be used where. Metrics are used to monitor the program without having to debug it and are crucial in notifying the developer if something looks wrong. The first step is figuring out where to use metrics. A good start is to look at the application in the worst possible way; what is the most likely area that an error will occur, after that it makes sense to surround the area with metrics that will catch and log the gathered data. Another great location for metrics is at positions where the through coming data is simple, and metrics can easily be implemented. This should be the case in between tasks. As optimally each task only does one thing it should be easy to check whether the starting and ending assertions are valid.
+
+/TODO{list of metrics and usages}
+
+\subsection{Logging}
+Logging in Flink is straightforward and can is used the same as in every other java program that uses log4j. As Flink already provides the necessary libraries to use log4j all a developer has to do is to write the logging config file. Although the logging process itself is the same as every other Java application, it should not be forgotten to use the different log levels that log4j provides. There is a lot of logging happening out of the box just by the Flink process itself. The six logging levels, from highest to lowest are:
+\begin{enumerate}
+  \item FATAL - the highest logging level, should only be used when the application cannot continue to work because of an unexpected error.
+  \item ERROR - whenever an unexpected exception is thrown it should be logged.
+  \item WARN - warnings that could lead to errors later on. These are difficult to think of beforehand but if used correctly are very valuable for the debugging developer.
+  \item INFO - relevant information like successful database connections and other milestones in the application to let the reader of a log file understand at which point in an application the program currently is.
+  \item DEBUG - should be used to record relevant information along the way that could be useful to a programmer when debugging. This could, for example, contain values of variables like database connection strings.
+  \item TRACE - is used to let a developer searching for a bug understand the path the application took. Should be logged into a unique log file as it would flood every other one.
+\end{enumerate}
 
 \section{Titel to do (Debugging Flink once an error occurs)}
