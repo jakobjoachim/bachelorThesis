@@ -2,7 +2,7 @@ As debugging of traditional programs is in many ways similar to debugging Flink 
 
 \section{Word Count Application}
 \label{wordCountApplication}
-This section quickly outlines the "Word Count Application" that is used in the thesis as an example. The Application counts how often each word is in a spcific text and returns the results to the command line. An example run of the program would be:
+This section quickly outlines the "Word Count Application" that is used in the thesis as an example. The Application counts how often each word is in a specific text and returns the results to the command line. An example run of the program would be:
 
 \begin{lstlisting}
   $ java -jar wordCountSimple.jar "Hello hello how do you do"
@@ -144,6 +144,13 @@ As the infection is already present at the function call, the function should be
   \item Observation - The program runs correctly
   \item Conclusion - The hypothesis is confirmed
 \end{enumerate}
-This method has to be repeated until the root of the problem is discovered. The advantage of this method is that the problem will be discovered eventually as more and more possible causes are getting removed.
+This method has to be repeated until the root of the problem is discovered. The advantage of this method is that the problem will be identified eventually.
 
 \subsection{Correct the defect}
+Once the defect has been found, it can be corrected. But solving the defect is not enough as it is also necessary to check if the problem is now solved. There are two reasons why this is necessary:
+\start{enumerate}
+  \item The defect was not responsible for the error - It is common to find other bugs while investigating a problem as the code is scrutinized. Another option is that the problem consists of two defects, not one. For both these reasons, it is necessary to check whether the defect was solved or not.
+  \item Is the cause an error? - Sometimes the deducted cause of the problem is in fact not the cause, and the correction is just another defect that fixes the problem in the particular problem case. To make sure that the cause really was the cause it is recommended to think about the correction and if it solves the problem for all cases without compromising all other working cases.
+\end{enumerate}
+
+Once all of these steps are done the only thing left to do is to mark the problem as solved in the problem report and add it to the next patch of the software.

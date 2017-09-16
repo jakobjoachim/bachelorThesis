@@ -4,11 +4,30 @@ This chapter is the centre part of the thesis. It explains in detail how the met
 \section{Titel to do (Better programming)}
 Flink applications are run remotely and without an active user providing input as it is typical for a regular application. Not having a user makes it much harder to recreate the problem as we only have the log files and the stack trace as information. As such it is crucial to have all the information at hand when the program fails, or we notice discrepancies in the resulting data. The only way to make sure that the information is accessible once a problem is reported is to think about what data is necessary for the debugging developer while writing the program. Another issue is that some problems are unique to a distributed environment and won't happen when running on a local host. This section will explain what can be done while writing the program to make the debugging progress much easier.
 
-\subsection{Theorem Proving}
+\subsection{todo}
+The Flink Framework promises a few features that try to set it apart from standard Java applications. These are referenced in \ref{flinkFramework}. The most important once for writing an application are the distribution and
 
+TODO: reference Unix philosophy, As every module is, very much like Unix command line tools, designed to have input and output streams
 
-\subsection{Logging and Metrics}
-\subsection{Utilising the Flink Tools}
-\subsection{Providing backtracking information}
+To take full advantage of these features and also make the program easily debuggable applications should be built in a modular way. Dividing the program into various modules has a lot of advantages:
+\begin{enumerate}
+  \item Easier to Develop - It is much simpler to develop a smaller application as it is much harder to lose track of what each piece of code should do. This reduced complexity in return reduces the likelihood of mistakes. Once the program is completed, it results in a more stable program that can be debugged easier.
+  \item Better Distribution -  As every Flink task can run on a different computer the smaller the tasks are, the better the Flink Job Manager can distribute the load evenly between the available resources.
+  \item Checkpoints are easy to find - Checkpoints are a core piece of Flink technology. It allows the framework not only to jump back and repeat a failed run without having to restart the whole application but also provides information about which state the application is currently in. This is extremely helpful as a lot of Flink applications only end when the program is cancelled by the user.
+\end{enumerate}
+
+The modulation of the program not only helps to achieve the advantages of the framework but also supports with debugging later as a lot of the information needed are gathered at the checkpoints.
+
+\subsubsection{Where to split the program}
+It should now be understood that the program should be divided into multiple tasks, the next question now is how to break the program to get a simple program where there are enough tasks but not too many as too many would lead to the opposite effect we want to achieve.
+
+\paragraph{Why are too many tasks bad?} When there are too many tasks, it gets even more complicated than when everything would be in its task as basically every line of code would be in a different place. Additionally, it wouldn't increase the performance as each task has some initialisation work that would diminish the performance gain achieved by distributing it perfectly.
+
+It makes sense to use the Unix philosophy of having one task do one thing. In most cases there are some obvious choices as in most Flink programs data is modified or analysed each task could be one transformation of the data. It should also be stated that when ever possible the pre-existing transformation functions of the Flink framework should be used. Only in rare situations is it necessary to implement your own data transformation classes. The pre defined classes have the advantage of being extensively tested in different conditions thus the risk of data going missing is extremely low.
+
+\subsection{Metrics}
+Now that the architecture of the program is done the next question is what metrics to use in which positions to achieve the optimal security.
+
+Once the program architecture is finished, it makes sense to think about what kind of metrics can be used where. Metrics are used to monitor the program without having to debug it and are crucial in notifying the developer if something looks wrong. The first is figuring out where to use metrics is to look at the application in the worst possible way, where is it most likely that an error will occur, after that it makes sense to surround the area with metrics that will catch and log the gathered data. Another great location for metrics is at positions where the through coming data is simple, and metrics can easily be implemented. All
 
 \section{Titel to do (Debugging Flink once an error occurs)}

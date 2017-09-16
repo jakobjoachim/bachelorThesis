@@ -1,0 +1,8 @@
+\subsection{Theorem Proving}
+Theorem proving is the process of mathematically proving that the core functionality of the program can work bug-free before writing the program. It proves that the design concept is working not that the later implementation will be bug-free. The huge advantage is that it eliminates the need to rewrite the entire core of a project later on when a problem is discovered as it is already proven that the core will work if implemented like described in the theorem. As theorem proving can take a lot of time, it is only recommended to do it if the application is enormous or the application is supposed to run for years in which case the time spent proving the core would be worth while.
+
+\subsubsection{How to use Theorem Proving}
+
+\subsection{Logging and Metrics}
+\subsection{Utilising the Flink Tools}
+\subsection{Providing backtracking information}
