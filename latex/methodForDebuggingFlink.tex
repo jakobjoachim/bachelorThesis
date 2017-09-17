@@ -8,6 +8,15 @@ Flink applications are run remotely and without an active user providing input a
 The Flink Framework promises a few features that try to set it apart from standard Java applications. These are referenced in \ref{flinkFramework}. The one that sets these applications apart from standard java once while programming is the distribution. Applications should be built in a modular way to take full advantage of these features and also make the program easily debuggable.
 The development of these tasks should be done using a very similar set of rules as the Unix philosophy states. In fact, Flink modules are not too different to Unix command line tools, they both provide a service while taking an input/output in a predefined way. For the Unix command line, this is the standard output, for Flink programs, these are input and output streams.
 
+\subsubsection{Unix Philosophy}
+The Unix philosophy is defined by Doug McIlroy, the inventor of the Unix pipe as follows: \ref{bell1978}
+\begin{enumerate}
+  \item Make each program do one thing well. To do a new job, build afresh rather than complicate old programs by adding new features.
+  \item Expect the output of every program to become the input to another, as yet unknown, program. Don't clutter output with extraneous information. Avoid stringently columnar or binary input formats. Don't insist on interactive input.
+  \item Design and build software, even operating systems, to be tried early, ideally within weeks. Don't hesitate to throw away the clumsy parts and rebuild them.
+  \item Use tools in preference to unskilled help to lighten a programming task, even if you have to detour to build the tools and expect to throw some of them out after you've finished using them.
+\end{enumerate}
+
 Dividing the program into various modules has a lot of advantages:
 \begin{enumerate}
   \item Easier to Develop - It is much simpler to develop a smaller application as it is much harder to lose track of what each piece of code should do. This reduced complexity in return reduces the likelihood of mistakes. Once the program is completed, it results in a more stable program that can be debugged easier.
