@@ -1,15 +1,14 @@
 
 This chapter is the centre part of the thesis. It explains in detail how the method works. It consists of two main sections, the first of which explores in detail what a developer should do while writing the program to minimise the work when debugging. This step is crucial as it is much harder to recreate problems locally as opposed to regular java applications. The second part focuses on the debugging itself once a developer is informed of an error and has to figure out what is causing it.
 
-\section{Titel to do (Better programming)}
+\section{Better Developing}
 Flink applications are run remotely and without an active user providing input as it is typical for a regular application. Not having a user makes it much harder to recreate the problem as we only have the log files and the stack trace as information. As such it is crucial to have all the information at hand when the program fails, or we notice discrepancies in the resulting data. The only way to make sure that the information is accessible once a problem is reported is to think about what data is necessary for the debugging developer while writing the program. Another issue is that some problems are unique to a distributed environment and won't happen when running on a local host. This section will explain what can be done while writing the program to make the debugging progress much easier.
 
-\subsection{todo}
-The Flink Framework promises a few features that try to set it apart from standard Java applications. These are referenced in \ref{flinkFramework}. The most important once for writing an application are the distribution and
+\subsection{Building Tasks}
+The Flink Framework promises a few features that try to set it apart from standard Java applications. These are referenced in \ref{flinkFramework}. The one that sets these applications apart from standard java once while programming is the distribution. Applications should be built in a modular way to take full advantage of these features and also make the program easily debuggable.
+The development of these tasks should be done using a very similar set of rules as the Unix philosophy states. In fact, Flink modules are not too different to Unix command line tools, they both provide a service while taking an input/output in a predefined way. For the Unix command line, this is the standard output, for Flink programs, these are input and output streams.
 
-TODO: reference Unix philosophy, As every module is, very much like Unix command line tools, designed to have input and output streams
-
-To take full advantage of these features and also make the program easily debuggable applications should be built in a modular way. Dividing the program into various modules has a lot of advantages:
+Dividing the program into various modules has a lot of advantages:
 \begin{enumerate}
   \item Easier to Develop - It is much simpler to develop a smaller application as it is much harder to lose track of what each piece of code should do. This reduced complexity in return reduces the likelihood of mistakes. Once the program is completed, it results in a more stable program that can be debugged easier.
   \item Better Distribution -  As every Flink task can run on a different computer the smaller the tasks are, the better the Flink Job Manager can distribute the load evenly between the available resources.
@@ -23,14 +22,12 @@ It should now be understandable that the programs should be divided into multipl
 
 \paragraph{Why are too many tasks bad?} When there are too many tasks, it gets even more complicated than when everything would be in its task as basically every line of code would be in a different place. Additionally, it wouldn't increase the performance as each task has some initialisation work that would diminish the performance gain achieved by distributing it perfectly.
 
-It makes sense to use the Unix philosophy of having one task do one thing. In most cases there are some obvious choices as in most Flink programs data is modified or analysed each task could be one transformation of the data. It should also be stated that when ever possible the pre-existing transformation functions of the Flink framework should be used. Only in rare situations is it necessary to implement your own data transformation classes. The pre defined classes have the advantage of being extensively tested in different conditions thus the risk of data going missing is extremely low.
+It makes sense to use the Unix philosophy of having one task do one thing. In most cases there are some obvious choices as in most Flink programs data is modified or analysed each task could be one transformation of the data. It should also be stated that when ever possible the pre-existing transformation functions of the Flink framework should be used. Only in rare situations is it necessary to implement your own data transformation classes. The predefined classes have the advantage of being extensively tested in different conditions thus the risk of data going missing is extremely low.
 
 \subsection{Metrics}
 Now that the architecture of the program is done the next question is what metrics to use in which positions to achieve the optimal security.
 
 Once the program architecture is finished, it makes sense to think about what kind of metrics can be used where. Metrics are used to monitor the program without having to debug it and are crucial in notifying the developer if something looks wrong. The first step is figuring out where to use metrics. A good start is to look at the application in the worst possible way; what is the most likely area that an error will occur, after that it makes sense to surround the area with metrics that will catch and log the gathered data. Another great location for metrics is at positions where the through coming data is simple, and metrics can easily be implemented. This should be the case in between tasks. As optimally each task only does one thing it should be easy to check whether the starting and ending assertions are valid.
-
-/TODO{list of metrics and usages}
 
 \subsection{Logging}
 Logging in Flink is straightforward and can is used the same as in every other java program that uses log4j. As Flink already provides the necessary libraries to use log4j all a developer has to do is to write the logging config file. Although the logging process itself is the same as every other Java application, it should not be forgotten to use the different log levels that log4j provides. There is a lot of logging happening out of the box just by the Flink process itself. The six logging levels, from highest to lowest are:
