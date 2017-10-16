@@ -3,3 +3,8 @@ As this Thesis is based on the Flink Framework it is important to understand how
 The framework offers four levels of abstraction, the first being just the low-level building blocks which almost never have to be modified. The second level is the base API which is accessible via the java or scala libraries, followed by Flinks own declarative DSL. The last level of abstraction is SQL as a high-level language.
 
 debugging erklaeren, breakpoints setzen usw.
+
+Write a test case for the whole application with sample data. can be built like a unit test as there is no human click factor involved
+Flinkspector
+define word for debugging developer
+when to start words with capital letters

@@ -1,4 +1,4 @@
-Intro
+letmeinIntro
 
 The Art of Debugging
   Basics of the Java Debugger
@@ -15,4 +15,9 @@ My Method for Debugging Flink
   # Flink much harder, no user to give info on reproduction, some problems cant be reproduced locally, some are input data specific.
     theorem proving
     # can be used to eliminate design flaws, only useful in extremy large and/or long living applications
-    
+  on error occurance
+  # A modified version of the Traffic approach can be used.
+    Create a ticket
+    Reproduce the problem
+    # difficult as there is a limited amount of information available
+    write a test case

@@ -1,21 +1,23 @@
 
-This chapter is the centre part of the thesis. It explains in detail how the method works. It consists of two main sections, the first of which explores in detail what a developer should do while writing the program to minimise the work when debugging. This step is crucial as it is much harder to recreate problems locally as opposed to regular java applications. The second part focuses on the debugging itself once a developer is informed of an error and has to figure out what is causing it.
+This chapter is the centre part of the thesis. It explains in detail how the method works. It consists of two main sections, the first of which explores in detail what a developer should do while writing the program to minimise the work when debugging. This step is crucial as it is much harder to recreate problems locally as opposed to regular Java applications. The second part focuses on the debugging itself once a developer is informed of an error and has to figure out what is causing it.
 
 \section{Better Developing}
 Flink applications are run remotely and without an active user providing input as it is typical for a regular application. Not having a user makes it much harder to recreate the problem as we only have the log files and the stack trace as information. As such it is crucial to have all the information at hand when the program fails, or we notice discrepancies in the resulting data. The only way to make sure that the information is accessible once a problem is reported is to think about what data is necessary for the debugging developer while writing the program. Another issue is that some problems are unique to a distributed environment and won't happen when running on a local host. This section will explain what can be done while writing the program to make the debugging progress much easier.
 
 \subsection{Building Tasks}
-The Flink Framework promises a few features that try to set it apart from standard Java applications. These are referenced in \ref{flinkFramework}. The one that sets these applications apart from standard java once while programming is the distribution. Applications should be built in a modular way to take full advantage of these features and also make the program easily debuggable.
+The Flink Framework promises a few features that try to set it apart from standard Java applications. These are referenced in \ref{flinkFramework}. The one that sets these applications apart from standard java once while writing the application is the distribution. Applications should be built in a modular way to take full advantage of these features and also make the program easily debuggable.
 The development of these tasks should be done using a very similar set of rules as the Unix philosophy states. In fact, Flink modules are not too different to Unix command line tools, they both provide a service while taking an input/output in a predefined way. For the Unix command line, this is the standard output, for Flink programs, these are input and output streams.
 
 \subsubsection{Unix Philosophy}
-The Unix philosophy is defined by Doug McIlroy, the inventor of the Unix pipe as follows: \ref{bell1978}
+The Unix philosophy is defined by Doug McIlroy, the inventor of the Unix pipe as follows: \cite{bell1978}
 \begin{enumerate}
   \item Make each program do one thing well. To do a new job, build afresh rather than complicate old programs by adding new features.
   \item Expect the output of every program to become the input to another, as yet unknown, program. Don't clutter output with extraneous information. Avoid stringently columnar or binary input formats. Don't insist on interactive input.
   \item Design and build software, even operating systems, to be tried early, ideally within weeks. Don't hesitate to throw away the clumsy parts and rebuild them.
   \item Use tools in preference to unskilled help to lighten a programming task, even if you have to detour to build the tools and expect to throw some of them out after you've finished using them.
 \end{enumerate}
+
+Most of the points mentioned here are of some relevance for Flink programming as well. Each task should do one job and do it well. The next paragraph will look into why that is. The second point is necessary by default in Flink, each task has to use the provided streams to work. The third point is equally important if not more important in Flink applications as it is in Unix programs. Always test each Task individually to make sure it works as designed and has no flaws on its own, only then can the whole application work without any problems.
 
 Dividing the program into various modules has a lot of advantages:
 \begin{enumerate}
@@ -50,3 +52,48 @@ Logging in Flink is straightforward and can is used the same as in every other j
 \end{enumerate}
 
 \section{Titel to do (Debugging Flink once an error occurs)}
+
+There are multiple reasons why an error might occur, the most common one being an exception in a log file. Another option is that the end user of the results finds that some of the results are incorrect. Both of these cases require slightly different handling. An excellent way to start the debug process is by using a modified version of the Traffic approach introduced here: \ref{aodZeller}.
+
+\subsection{Track the Problem in the database}
+Tracking a problem is essential in every development cycle no matter in which language or with what framework and Flink is no exception. It is crucial for every developer to track the status of problems in Flink applications as it helps to minimise work. Along the already mentioned advantages in chapter \ref{aodZellerTrack}, like having an easily accessible database of open problems and knowing which problems are more important than others, tracking the problems of flink applications offers some other advantages as well.
+
+\begin{enumerate}
+  \item Having access to relevant log files.
+  \item Knowing how past problems were solved.
+  \item What relevant metrics were when the error occurred.
+  \item which subtask of what task manager failed, allows seeing if problems only occur on one machine.
+\end{enumerate}
+
+To achieve these advantages the tracking database needs additionally to the already mentioned fields in \ref{aodZellerTrack} a few additional columns. As soon as a problem is experienced the current log files should be saved so that it is easy for the developer to find the relevant lines in the log file even if he starts debugging months later. Secondly, for the same reason, all appropriate metrics should be saved as well.
+
+The resulting columns are now:
+
+\begin{enumerate}
+  \item Description.
+  \item State
+  \item Resolution
+  \item Assigned Developer
+  \item Severity
+  \item Link to logs
+  \item Steps that were taken to resolve the problem
+  \item Relevant metrics
+  \item Task manager that was used
+\end{enumerate}
+
+\subsection{Reproduce the failure}
+Reproducing the problem is probably the most challenging part of debugging flink applications. As there is no user to report the problem the only help the debugging developer has are information provided by the problem report from the last chapter.
+
+There are two options how a problem is discovered, and both require different steps to reproduce the problem. The first and more difficult one is that an error in the resulting data is discovered without an exception being recorded in the log files. This means that the program is doing something different then what the developer expected when writing it. The second option to discover a problem is by having an exception showing up in the log file.
+
+\subsubsection{Faulty resulting data}
+This section will use the word count application as an example program to debug. Notice that the exact implementation of it is irrelevant at this point. The application is a black box as only the incoming, and resulting data are known. To always have the same expected result the following sentence will be used as an input each time: "Hello hello flink flink flink one two". The expected result would be hello - 2, flink - 3, one - 1, two - 1.
+
+The first question that has to be answered is
+"how much data is affected". Are only a few pieces incorrect or is everything faulty? In the example this could be hello - 3, flink - 1, one - 1, two - 2. Each word has the count of the next. So this would be considered as the second case "everything is faulty" even though the word "one" has the correct answer. This is important to note as sometimes a fault in a program can still result in a correct result. This first question just differentiates between a few faults and a majority of faults, so the debugging developer has to look at the whole picture and see if the majority of data is corrupt. An example for only a few faults would be: Hello - 1, hello - 1, flink - 3, one - 1, two - 1. Here only one additional word was counted ("Hello"). If the first case is valid (all data is faulty) the next question that should be asked is why the problem is only now showing up. If the problem is observable for almost all the resulting data, surely it should have been noticed while testing the application. In most cases, the problem was either found during testing in which case the problem is already reproducible or was not observable on the local test machine. That means that either the incoming data is different to the local one or that something is being executed differently in the remote network than on the local machine. As Flink is responsible for the distribution and everything is running in a JVM, it is implausible that flink is to blame. In most cases, the data on the server will differ from the local one. If that can be confirmed the only thing left to do is to update the local test data so that the problem can be reproduced locally.
+
+The other option was that only some pieces of data were wrong. In that case, the process of reproducing the fault is entirely different. There are two options available. First, figure out what makes the faulty data unique in comparison to the other data. In the word count example, this would be the capital "H" at the beginning of the first "Hello". If this option is successful, the unique case can be added to the test cases, and the reproduction was successful. If on the other hand, the developer can't figure out why the one failing case is different to the others the tool that is written alongside this thesis can be used. It can show which incoming data was leading to which result. In the example above it could show that the first "hello" was the result of the original sentence. As there is only one sentence in this example that is not very helpful, but in a more realistic use case, there could be millions of sentences where just a few have capital letters in them. Once the starting sentence is discovered, it can easily be reproduced.
+
+\paragraph{} The fault should now be reproducible on a local machine as the affecting test data was found. The only fault that remains are problems that only occur on the remote network and are not happening because of incoming data.
+
+\subsubsection{Exception in log file}
