@@ -62,15 +62,15 @@ Tracking a problem is essential in every development cycle no matter in which la
   \item Having access to relevant log files.
   \item Knowing how past problems were solved.
   \item What relevant metrics were when the error occurred.
-  \item which subtask of what task manager failed, allows seeing if problems only occur on one machine.
+  \item Which subtask of what task manager failed, allows seeing if problems only occur on one machine.
 \end{enumerate}
 
 To achieve these advantages the tracking database needs additionally to the already mentioned fields in \ref{aodZellerTrack} a few additional columns. As soon as a problem is experienced the current log files should be saved so that it is easy for the developer to find the relevant lines in the log file even if he starts debugging months later. Secondly, for the same reason, all appropriate metrics should be saved as well.
 
-The resulting columns are now:
+The resulting columns now are:
 
 \begin{enumerate}
-  \item Description.
+  \item Description
   \item State
   \item Resolution
   \item Assigned Developer
@@ -87,12 +87,24 @@ Reproducing the problem is probably the most challenging part of debugging flink
 There are two options how a problem is discovered, and both require different steps to reproduce the problem. The first and more difficult one is that an error in the resulting data is discovered without an exception being recorded in the log files. This means that the program is doing something different then what the developer expected when writing it. The second option to discover a problem is by having an exception showing up in the log file.
 
 \subsubsection{Faulty resulting data}
-This section will use the word count application as an example program to debug. Notice that the exact implementation of it is irrelevant at this point. The application is a black box as only the incoming, and resulting data are known. To always have the same expected result the following sentence will be used as an input each time: "Hello hello flink flink flink one two". The expected result would be hello - 2, flink - 3, one - 1, two - 1.
+This section will use the word count application as an example program to debug. Notice that the exact implementation of it is irrelevant at this point. The application is a black box as only the incoming, and resulting data are known. To always have the same expected result the following sentence will be used as an input each time: "Hello hello flink flink flink one two". The expected result would be:
+\begin{lstlisting}
+  hello - 2, flink - 3, one - 1, two - 1
+\end{lstlisting}
 
 The first question that has to be answered is
-"how much data is affected". Are only a few pieces incorrect or is everything faulty? In the example this could be hello - 3, flink - 1, one - 1, two - 2. Each word has the count of the next. So this would be considered as the second case "everything is faulty" even though the word "one" has the correct answer. This is important to note as sometimes a fault in a program can still result in a correct result. This first question just differentiates between a few faults and a majority of faults, so the debugging developer has to look at the whole picture and see if the majority of data is corrupt. An example for only a few faults would be: Hello - 1, hello - 1, flink - 3, one - 1, two - 1. Here only one additional word was counted ("Hello"). If the first case is valid (all data is faulty) the next question that should be asked is why the problem is only now showing up. If the problem is observable for almost all the resulting data, surely it should have been noticed while testing the application. In most cases, the problem was either found during testing in which case the problem is already reproducible or was not observable on the local test machine. That means that either the incoming data is different to the local one or that something is being executed differently in the remote network than on the local machine. As Flink is responsible for the distribution and everything is running in a JVM, it is implausible that flink is to blame. In most cases, the data on the server will differ from the local one. If that can be confirmed the only thing left to do is to update the local test data so that the problem can be reproduced locally.
+"how much data is affected". Are only a few pieces incorrect or is everything faulty? Imagine the result of the application would be:
+\begin{lstlisting}
+  hello - 3, flink - 1, one - 1, two - 2
+\end{lstlisting}
+  Each word has the count of the next word. So this would be considered as the second case "everything is faulty" even though the word "one" has the correct answer. This is important to note as sometimes a fault in a program can still result in a correct result. This first question just differentiates between a few faults and a majority of faults, so the debugging developer has to look at the whole picture and see if the majority of data is corrupt. An example for only a few faults would be:
+\begin{lstlisting}
+ Hello - 1, hello - 1, flink - 3, one - 1, two - 1
+\end{lstlisting}
+Here only one additional word was counted ("Hello").
+\paragraph{} If the first case is valid (all data is faulty) the next question that should be asked is why the problem is only now showing up. If the problem is observable for almost all the resulting data, surely it should have been noticed while testing the application. In most cases, the problem was either found during testing in which case the problem is already reproducible or was not observable on the local test machine. That means that either the incoming data is different to the local one or that something is being executed differently on the remote network than on the local machine. As Flink is responsible for the distribution and everything is running in a JVM, it is implausible that flink is to blame. In most cases, the data on the server will differ from the local one. If that can be confirmed the only thing left to do is to update the local test data so that the problem can be reproduced locally.
 
-The other option was that only some pieces of data were wrong. In that case, the process of reproducing the fault is entirely different. There are two options available. First, figure out what makes the faulty data unique in comparison to the other data. In the word count example, this would be the capital "H" at the beginning of the first "Hello". If this option is successful, the unique case can be added to the test cases, and the reproduction was successful. If on the other hand, the developer can't figure out why the one failing case is different to the others the tool that is written alongside this thesis can be used. It can show which incoming data was leading to which result. In the example above it could show that the first "hello" was the result of the original sentence. As there is only one sentence in this example that is not very helpful, but in a more realistic use case, there could be millions of sentences where just a few have capital letters in them. Once the starting sentence is discovered, it can easily be reproduced.
+The other option was that only some pieces of data were wrong. In that case, the process of reproducing the fault is entirely different. There are two options available. First, figure out what makes the faulty data unique in comparison to the other data. In the word count example, this would be the capital "H" at the beginning of the first "Hello". If this option is successful, the unique case can be added to the test cases, and the reproduction was successful. If on the other hand, the developer can't figure out why the one failing case is different to the others the tool that is written alongside this thesis can be used, it will be explained in detail later on. It can show which incoming data was leading to which result. In the example above it could show that the first "hello" was the result of the original sentence. As there is only one sentence in this example that is not very helpful, but in a more realistic use case, there could be millions of sentences where just a few have capital letters in them. Once the starting sentence is discovered, it can easily be reproduced.
 
 \paragraph{} The fault should now be reproducible on a local machine as the affecting test data was found. The only fault that remains are problems that only occur on the remote network and are not happening because of incoming data.
 
