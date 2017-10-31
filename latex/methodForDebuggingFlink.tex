@@ -51,7 +51,7 @@ Logging in Flink is straightforward and can is used the same as in every other j
   \item TRACE - is used to let a developer searching for a bug understand the path the application took. Should be logged into a unique log file as it would flood every other one.
 \end{enumerate}
 
-\section{Titel to do (Debugging Flink once an error occurs)}
+\section{The Debugging Process}
 
 There are multiple reasons how an error might be discovered, the most common one being an exception in a log file. Another option is that the end user of the results finds that some of the results are incorrect. Both of these cases require slightly different handling. An excellent way to start the debug process is by using a modified version of the Traffic approach introduced here: \ref{aodZeller}.
 
@@ -82,7 +82,7 @@ The resulting columns now are:
 \end{enumerate}
 
 \subsection{Reproduce the failure}
-Reproducing the problem is probably the most challenging part of debugging flink applications. As there is no user to report the problem the only help the debugging developer has are information provided by the problem report from the last chapter.
+Reproducing the problem is probably the most challenging part of debugging Flink applications. As there is no user to report the problem the only help the debugging developer has is information provided by the problem report from the last chapter.
 
 There are two options how a problem is discovered, and both require different steps to reproduce the problem. The first and more difficult one is that an error in the resulting data is discovered without an exception being recorded in the log files. This means that the program is doing something different then what the developer expected when writing it. The second option to discover a problem is by having an exception showing up in the log file.
 
@@ -91,6 +91,15 @@ This section will use the word count application as an example program to debug.
 \begin{lstlisting}
   hello - 2, flink - 3, one - 1, two - 1
 \end{lstlisting}
+
+The following diagram shows the process that is used in this case /ref{debuggingFaultyData}:
+
+\begin{figure}[h!]
+    \centering
+      \includegraphics[width=0.9\textwidth]{DebugWithoutException.png}
+      \caption{Debbugging faulty data}
+      \label{debuggingFaultyData}
+\end{figure}
 
 The first question that has to be answered is
 "how much data is affected". Are only a few pieces incorrect or is everything faulty? Imagine the result of the application would be:
@@ -124,4 +133,22 @@ The most common way to discover a failure in a program is by discovering an exce
 In most cases, the developer should have no problem reproducing the error easily without going to much in depth into the steps presented in this chapter. Although these steps help to guide a developer that might not even be deeply familiar with the code through the process with ease sometimes problems occur that can not be found using these steps as they are too unique and wouldn't appear for anybody else. If a developer stumbles over such a problem, it is suggested to apply the same method that is explained in \ref{aodZellerIsolateDefect} by creating a hypothesis checking the outcome and repeating the process until the failure can be reproduced.
 
 \subsection{Automate and simplify the test case}
-Automation is
+In comparison to typical Java applications where automated testing can be quite tricky as a graphical user interface, and user interaction is involved, automating the test cases for Flink applications is quite easy. All that the developer has to do is take the result of the last section and write a unit test with the specific start parameters. The "Traffic Approach" also suggests simplifying the test case to be as easy to implement as possible so that only the error and nothing else gets checked. This can be useful to make it easier to help spot the problem in the code later on but is not needed for Flink applications. For example, if the word count application were to crash on "-" characters and the input test case would be an entire book page of words it makes it harder later on to find the actual character that is causing the fault but makes it easier to create the test case. As understanding the problem and simplifying the test case is mostly the same it makes sense to leave the test case long and rebuild it once the failure is understood. This way if the same mistake gets built into the code again it is easily spottable as the test case already has a descriptive name, description as well as a ticket number associated with it. Another developer could then easily reproduce the steps that were taken to solve the problem the last time.
+
+\subsection{Find possible infection origins}
+Finding the possible infection origins is the same as the standard "Traffic Approach" \ref{aodZellerInfectionOrigins} with a few small changes. Firstly if there is no failure and the resulting data is wrong, the developer can use the line where the false data got stored as the "exception throwing line". At that moment the failure is already present in the application so the line can serve the same way an exception would. If the program is too complex to overview how it got to that point a stack trace can be printed to the console by adding the following line (remove this afterwards):
+\begin{lstlisting}
+ System.out.println(new Throwable().getStackTrace())
+\end{lstlisting}
+Once the start point has been defined the process is the same as it is for standard Java applications.
+
+\subsection{Focus on the most likely origins}
+
+\subsection{Isolate the infection in the chain}
+
+\subsection{Correct the defect}
+Once the defect has been found, it can be corrected. Although fixing the defect is the reason the whole debugging process was started it is not the end. As explained in the \ref{aodZellerCorrectDefect} other questions need to be answered before the developer can move on to something else.
+
+If there was no exception thrown and the failure was purely faulty data, it is not enough to have a test case that makes sure that the same error gets reported again, but the developer should also add a check into the program that throws an exception.
+
+If the test case was not simplified now is the time to fix that. If the problem was only a specific character in the input, the developer should rename the test case to something easily understandable and add the ticket number as a comment to the method head. Also the input.
