@@ -92,7 +92,7 @@ This section will use the word count application as an example program to debug.
   hello - 2, flink - 3, one - 1, two - 1
 \end{lstlisting}
 
-The following diagram shows the process that is used in this case /ref{debuggingFaultyData}:
+\paragraph{} The following text explains the process that is used in this case alongside a diagram: \ref{debuggingFaultyData}
 
 \begin{figure}[h!]
     \centering
@@ -101,7 +101,7 @@ The following diagram shows the process that is used in this case /ref{debugging
       \label{debuggingFaultyData}
 \end{figure}
 
-The first question that has to be answered is
+\paragraph{} The first question that has to be answered is
 "how much data is affected". Are only a few pieces incorrect or is everything faulty? Imagine the result of the application would be:
 \begin{lstlisting}
   hello - 3, flink - 1, one - 1, two - 2
@@ -113,11 +113,11 @@ The first question that has to be answered is
 Here only one additional word was counted ("Hello").
 \paragraph{} If the first case is valid (all data is faulty) the next question that should be asked is why the problem is only now showing up. If the problem is observable for almost all the resulting data, surely it should have been noticed while testing the application. In most cases, the problem was either found during testing in which case the problem is already reproducible or was not observable on the local test machine. That means that either the incoming data is different to the local one or that something is being executed differently on the remote network than on the local machine. As Flink is responsible for the distribution and everything is running in a JVM, it is implausible that flink is to blame. In most cases, the data on the server will differ from the local one. If that can be confirmed the only thing left to do is to update the local test data so that the problem can be reproduced locally.
 
-The other option was that only some pieces of data were wrong. In that case, the process of reproducing the fault is entirely different. There are two options available. First, figure out what makes the faulty data unique in comparison to the other data. In the word count example, this would be the capital "H" at the beginning of the first "Hello". If this option is successful, the unique case can be added to the test cases, and the reproduction was successful. If on the other hand, the developer can't figure out why the one failing case is different to the others the tool that is written alongside this thesis can be used, it will be explained in detail later on. It can show which incoming data was leading to which result. In the example above it could show that the first "hello" was the result of the original sentence. As there is only one sentence in this example that is not very helpful, but in a more realistic use case, there could be millions of sentences where just a few have capital letters in them. Once the starting sentence is discovered, it can easily be reproduced.
+\paragraph{} The other option was that only some pieces of data were wrong. In that case, the process of reproducing the fault is entirely different. There are two options available. First, figure out what makes the faulty data unique in comparison to the other data. In the word count example, this would be the capital "H" at the beginning of the first "Hello". If this option is successful, the unique case can be added to the test cases, and the reproduction was successful. If on the other hand, the developer can't figure out why the one failing case is different to the others the tool that is written alongside this thesis can be used, it will be explained in detail later on. It can show which incoming data was leading to which result. In the example above it could show that the first "hello" was the result of the original sentence. As there is only one sentence in this example that is not very helpful, but in a more realistic use case, there could be millions of sentences where just a few have capital letters in them. Once the starting sentence is discovered, it can easily be reproduced.
 
 \paragraph{} The last step before moving on to the next section is to make sure that the reproduction works. There is little use in finding something in the code that supposedly is the problem only to find out later that the problem is something else.
 
-\paragraph{} The fault should now be reproducible on a local machine as the affecting test data was found. The only fault that remains are problems that only occur on the remote network and are not happening because of incoming data.
+\paragraph{} The fault should now be reproducible on a local machine as the affecting test data was found. The only fault that remains are problems that only occur on the remote network and are not happening because of incoming data. Solving that problem is done by applying the scientific method explained in \ref{aodZellerIsolateDefect}
 
 \subsubsection{Exception in log file}
 The most common way to discover a failure in a program is by discovering an exception. It makes no difference if this exception was found in a log file or directly in the developer's console. The steps that are necessary to reproduce these errors are often easier as well.
@@ -149,6 +149,8 @@ Once the start point has been defined the process is the same as it is for stand
 \subsection{Correct the defect}
 Once the defect has been found, it can be corrected. Although fixing the defect is the reason the whole debugging process was started it is not the end. As explained in the \ref{aodZellerCorrectDefect} other questions need to be answered before the developer can move on to something else.
 
-If there was no exception thrown and the failure was purely faulty data, it is not enough to have a test case that makes sure that the same error gets reported again, but the developer should also add a check into the program that throws an exception.
-
-If the test case was not simplified now is the time to fix that. If the problem was only a specific character in the input, the developer should rename the test case to something easily understandable and add the ticket number as a comment to the method head. Also the input.
+\paragraph{} Alongside the already mentioned tasks a Flink developer should also think about the following steps:
+\start{enumerate}
+  \item If there was no exception thrown and the failure was purely faulty data, it is not enough to have a test case that makes sure that the same error gets reported again, but the developer should also add a check into the program that throws an exception. This is important as it is crucial that faulty data can't be generated by the program.
+  \item If the test case was not simplified now is the time to fix that. The developer should shorten the input to the bare minimum that would produce the failure, rename the test case accordingly and add the ticket number as a comment to the test case.
+\end{enumerate}
