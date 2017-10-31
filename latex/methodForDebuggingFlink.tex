@@ -53,7 +53,7 @@ Logging in Flink is straightforward and can is used the same as in every other j
 
 \section{Titel to do (Debugging Flink once an error occurs)}
 
-There are multiple reasons why an error might occur, the most common one being an exception in a log file. Another option is that the end user of the results finds that some of the results are incorrect. Both of these cases require slightly different handling. An excellent way to start the debug process is by using a modified version of the Traffic approach introduced here: \ref{aodZeller}.
+There are multiple reasons how an error might be discovered, the most common one being an exception in a log file. Another option is that the end user of the results finds that some of the results are incorrect. Both of these cases require slightly different handling. An excellent way to start the debug process is by using a modified version of the Traffic approach introduced here: \ref{aodZeller}.
 
 \subsection{Track the Problem in the database}
 Tracking a problem is essential in every development cycle no matter in which language or with what framework and Flink is no exception. It is crucial for every developer to track the status of problems in Flink applications as it helps to minimise work. Along the already mentioned advantages in chapter \ref{aodZellerTrack}, like having an easily accessible database of open problems and knowing which problems are more important than others, tracking the problems of flink applications offers some other advantages as well.
@@ -106,6 +106,22 @@ Here only one additional word was counted ("Hello").
 
 The other option was that only some pieces of data were wrong. In that case, the process of reproducing the fault is entirely different. There are two options available. First, figure out what makes the faulty data unique in comparison to the other data. In the word count example, this would be the capital "H" at the beginning of the first "Hello". If this option is successful, the unique case can be added to the test cases, and the reproduction was successful. If on the other hand, the developer can't figure out why the one failing case is different to the others the tool that is written alongside this thesis can be used, it will be explained in detail later on. It can show which incoming data was leading to which result. In the example above it could show that the first "hello" was the result of the original sentence. As there is only one sentence in this example that is not very helpful, but in a more realistic use case, there could be millions of sentences where just a few have capital letters in them. Once the starting sentence is discovered, it can easily be reproduced.
 
+\paragraph{} The last step before moving on to the next section is to make sure that the reproduction works. There is little use in finding something in the code that supposedly is the problem only to find out later that the problem is something else.
+
 \paragraph{} The fault should now be reproducible on a local machine as the affecting test data was found. The only fault that remains are problems that only occur on the remote network and are not happening because of incoming data.
 
 \subsubsection{Exception in log file}
+The most common way to discover a failure in a program is by discovering an exception. It makes no difference if this exception was found in a log file or directly in the developer's console. The steps that are necessary to reproduce these errors are often easier as well.
+
+\begin{enumerate}
+  \item What kind of error was thrown? - The developer should always keep in mind what type of exception was thrown as it is much easier to find the origin of the failure when knowing what to look for.
+  \item Where was the failure thrown? - This information is the starting point for the search of how to reproduce the failure. It is included in the stack trace of the exception so it shouldn't be a problem finding it.
+  \item Isolate the conditions in the method - Knowing under which conditions the failure occurs is crucial. Without this information, it is almost impossible to reproduce the failure reliably as only a few errors occur under all circumstances. The developer should start by just focusing on the method the exception is thrown in and finding the conditions by looking at the "if statements" that precedent the line in question. Note in which state each variable has to be for the exception to be thrown. This can include the variable that is throwing the exception as well. In most cases, the developer should now already have a pretty good idea as to when the error occurs and if that is the case can skip the next step to save time.
+  \item Repeat the same step for the method - Once it is understood in which conditions the failure occurs in the given method, the developer has to find out in which cases the method is being called with the conditions that were deducted in the last step. This can be done by repeating the step above only for the line where the method was called, which is included in the stack trace of the exception as well. This step has to be repeated until the start point of the application has been reached. At this point, the developer should have a good understanding when the exception is thrown and should be able to reproduce it.
+\end{enumerate}
+
+\subsubsection{Conclusion}
+In most cases, the developer should have no problem reproducing the error easily without going to much in depth into the steps presented in this chapter. Although these steps help to guide a developer that might not even be deeply familiar with the code through the process with ease sometimes problems occur that can not be found using these steps as they are too unique and wouldn't appear for anybody else. If a developer stumbles over such a problem, it is suggested to apply the same method that is explained in \ref{aodZellerIsolateDefect} by creating a hypothesis checking the outcome and repeating the process until the failure can be reproduced.
+
+\subsection{Automate and simplify the test case}
+Automation is
