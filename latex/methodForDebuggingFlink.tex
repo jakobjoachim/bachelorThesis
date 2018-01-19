@@ -53,16 +53,16 @@ Logging in Flink is straightforward and can is used the same as in every other j
 
 \section{The Debugging Process}
 
-There are multiple reasons how an error might be discovered, the most common one being an exception in a log file. Another option is that the end user of the results finds that some of the results are incorrect. Both of these cases require slightly different handling. An excellent way to start the debug process is by using a modified version of the Traffic approach introduced here: \ref{aodZeller}.
+There are multiple reasons how an error might be discovered, the most common one being an exception in a log file. Another option is that the end user of the results finds that some of the results are incorrect. Both of these cases require slightly different handling. An excellent way to start the debug process is by using a modified version of the Traffic approach introduced in \ref{aodZeller}.
 
 \subsection{Track the Problem in the database}
-Tracking a problem is essential in every development cycle no matter in which language or with what framework and Flink is no exception. It is crucial for every developer to track the status of problems in Flink applications as it helps to minimise work. Along the already mentioned advantages in chapter \ref{aodZellerTrack}, like having an easily accessible database of open problems and knowing which problems are more important than others, tracking the problems of flink applications offers some other advantages as well.
+Tracking a problem is essential in every development cycle no matter in which language or with what framework and Flink is no exception. It is crucial for every developer to track the status of problems in Flink applications as it helps to minimise work. Along the already mentioned advantages in chapter \ref{aodZellerTrack}, like having an easily accessible database of open problems and knowing which problems are more important than others, tracking the problems of Flink applications offers some other advantages as well.
 
 \begin{enumerate}
   \item Having access to relevant log files.
   \item Knowing how past problems were solved.
   \item What relevant metrics were when the error occurred.
-  \item Which subtask of what task manager failed, allows seeing if problems only occur on one machine.
+  \item Which subtask of what task manager failed which allows seeing if problems only occur on one machine.
 \end{enumerate}
 
 To achieve these advantages the tracking database needs additionally to the already mentioned fields in \ref{aodZellerTrack} a few additional columns. As soon as a problem is experienced the current log files should be saved so that it is easy for the developer to find the relevant lines in the log file even if he starts debugging months later. Secondly, for the same reason, all appropriate metrics should be saved as well.
@@ -84,7 +84,7 @@ The resulting columns now are:
 \subsection{Reproduce the failure}
 Reproducing the problem is probably the most challenging part of debugging Flink applications. As there is no user to report the problem the only help the debugging developer has is information provided by the problem report from the last chapter.
 
-There are two options how a problem is discovered, and both require different steps to reproduce the problem. The first and more difficult one is that an error in the resulting data is discovered without an exception being recorded in the log files. This means that the program is doing something different then what the developer expected when writing it. The second option to discover a problem is by having an exception showing up in the log file.
+There are two possibilities how a problem is discovered, and both require different steps to reproduce the problem. The first and more difficult one is that an error in the resulting data is discovered without an exception being recorded in the log files. This means that the program is doing something different then what the developer expected when writing it. The second option to discover a problem is by having an exception showing up in the log file.
 
 \subsubsection{Faulty resulting data}
 This section will use the word count application as an example program to debug. Notice that the exact implementation of it is irrelevant at this point. The application is a black box as only the incoming, and resulting data are known. To always have the same expected result the following sentence will be used as an input each time: "Hello hello flink flink flink one two". The expected result would be:
@@ -115,7 +115,7 @@ Here only one additional word was counted ("Hello").
 
 \paragraph{} The other option was that only some pieces of data were wrong. In that case, the process of reproducing the fault is entirely different. There are two options available. First, figure out what makes the faulty data unique in comparison to the other data. In the word count example, this would be the capital "H" at the beginning of the first "Hello". If this option is successful, the unique case can be added to the test cases, and the reproduction was successful. If on the other hand, the developer can't figure out why the one failing case is different to the others the tool that is written alongside this thesis can be used, it will be explained in detail later on. It can show which incoming data was leading to which result. In the example above it could show that the first "hello" was the result of the original sentence. As there is only one sentence in this example that is not very helpful, but in a more realistic use case, there could be millions of sentences where just a few have capital letters in them. Once the starting sentence is discovered, it can easily be reproduced.
 
-\paragraph{} The last step before moving on to the next section is to make sure that the reproduction works. There is little use in finding something in the code that supposedly is the problem only to find out later that the problem is something else.
+\paragraph{} The last step before moving on to the next section is to make sure that the reproduction works. There is little to no use in finding something in the code that is supposedly the problem only to find out later that the problem is something else.
 
 \paragraph{} The fault should now be reproducible on a local machine as the affecting test data was found. The only fault that remains are problems that only occur on the remote network and are not happening because of incoming data. Solving that problem is done by applying the scientific method explained in \ref{aodZellerIsolateDefect}
 
@@ -130,17 +130,39 @@ The most common way to discover a failure in a program is by discovering an exce
 \end{enumerate}
 
 \subsubsection{Conclusion}
-In most cases, the developer should have no problem reproducing the error easily without going to much in depth into the steps presented in this chapter. Although these steps help to guide a developer that might not even be deeply familiar with the code through the process with ease sometimes problems occur that can not be found using these steps as they are too unique and wouldn't appear for anybody else. If a developer stumbles over such a problem, it is suggested to apply the same method that is explained in \ref{aodZellerIsolateDefect} by creating a hypothesis checking the outcome and repeating the process until the failure can be reproduced.
+In most cases, the developer should have no problem reproducing the error easily without going to much in depth into the steps presented in this chapter. Although these steps help to guide a developer that might not even be deeply familiar with the code through the process with ease sometimes problems occur that can not be found using these steps as they are too unique and would not appear for anybody else. If a developer stumbles over such a problem, it is suggested to apply the same method that is explained in \ref{aodZellerIsolateDefect} by creating a hypothesis checking the outcome and repeating the process until the failure can be reproduced.
+
+\paragraph{} Because the methodology is quite different for each of the described cases the next steps are grouped by case to make it easier to follow.
+
 
 \subsection{Automate and simplify the test case}
-In comparison to typical Java applications where automated testing can be quite tricky as a graphical user interface, and user interaction is involved, automating the test cases for Flink applications is quite easy. All that the developer has to do is take the result of the last section and write a unit test with the specific start parameters. The "Traffic Approach" also suggests simplifying the test case to be as easy to implement as possible so that only the error and nothing else gets checked. This can be useful to make it easier to help spot the problem in the code later on but is not needed for Flink applications. For example, if the word count application were to crash on "-" characters and the input test case would be an entire book page of words it makes it harder later on to find the actual character that is causing the fault but makes it easier to create the test case. As understanding the problem and simplifying the test case is mostly the same it makes sense to leave the test case long and rebuild it once the failure is understood. This way if the same mistake gets built into the code again it is easily spottable as the test case already has a descriptive name, description as well as a ticket number associated with it. Another developer could then easily reproduce the steps that were taken to solve the problem the last time.
+In comparison to typical Java applications where automated testing can be quite tricky as a graphical user interface, and user interaction is involved, automating the test cases for Flink applications is quite easy assuming that the problem is reproducible on a local machine. All that the developer has to do is take the result of the last section and write a test with the specific start parameters. The "Traffic Approach" also suggests simplifying the test case to be as easy to implement as possible so that only the error and nothing else gets checked. This can be useful to make it easier to help spot the problem in the code later on but is not needed for Flink applications. For example, if the word count application were to crash on "-" characters and the input test case would be an entire book page of words it makes it harder later on to find the actual character that is causing the fault but makes it easier to create the test case. As understanding the problem and simplifying the test case is mostly the same it makes sense to leave the test case long and rebuild it once the failure is understood. This way if the same mistake gets built into the code again it is easily spottable as the test case already has a descriptive name, description as well as a ticket number associated with it. Another developer could then easily reproduce the steps that were taken to solve the problem the last time.
 
 \subsection{Find possible infection origins}
-Finding the possible infection origins is the same as the standard "Traffic Approach" \ref{aodZellerInfectionOrigins} with a few small changes. Firstly if there is no failure and the resulting data is wrong, the developer can use the line where the false data got stored as the "exception throwing line". At that moment the failure is already present in the application so the line can serve the same way an exception would. If the program is too complex to overview how it got to that point a stack trace can be printed to the console by adding the following line (remove this afterwards):
+This step in the debugging process is just a collection of possible points to start the debug process from. It is always possible to change this point later if the chosen point turns out not to be the origin of the infection. Flink applications are very different to other Java applications in this section. Flink uses a special way to write applications that makes it possible to run on multiple machines without having to specify how and more importantly which information are transfered between different machines. Because of this complication, code that is written in Flink is being executed before a single line piece of information is read. At the end of each application is an execute statement which then starts the application. When debugging the code written by the developer with a debugger the only information that can be gathered is whether or not flink can successfully build the execution tree or not. The only relevant information this provides to the developer is that all checks that Flink itselfs runs before executing are true. At the time of writing this thesis (Flink 1.5) it ensures successful connections to the databases or other data stores used by the application and  compatibality of the used datasources and backend. As an example if a backend that supports snapshots is chosen, Flink will check if the first datasource supports rollbacks as that is a requirement of snapshots. Other problems like incompatible datatypes can still occur afterwards.
+
+
+\subsection{Exception before application is executed}
+The first caseThe execution tree is not successfully build if any lines before the execute line appear in the stack trace. If that is the case there are mainly two possible scenarios:
+
+\begin{itemize}
+  \item The application can not connect to the database
+  \item Some of the Flink components are incompatible with others.
+\end{itemize}
+
+No matter which of these two is the case the procedure is the same. As the failure happens before any of the Flink specific issues are encountered the method described in the standard "Traffic Approach" \ref{aodZellerInfectionOrigins} is enough to find the root of the problem. This means checking the specified line in the stack trace and checking if the line could be responsible. As Flink applications are only a set of transformations on datastreams this search is relativly easy as it is most probably found either at one of the transformations or at the inital connect to the database.
+
+\subsection{Exception in a transformation function}
+ If on the other hand the execution of the application was successfully started the procedure is a bit different. The origin of the infection lies either in one of the transformations or in the transfer of the data between the data streams. If a transformation is faulty or at least showing sings of the infection it is a good idea to use the line where the transformation was called as the infection origin.
+
+\subsection{Exception in internal Flink code}
+If so far none of the addressed points were successful the problem is most likely the transfer of data between two data streams. In this case the stack trace will not have many useful information as it only points to some Flink internal classes. The only useful information that can be gathered is between which transformations the error occured. It makes sense to use the first of those lines as a starting point.
+
+\subsection{No Exception but resulting data is faulty}
+if there is no failure and the resulting data is wrong, the developer can use the line where the false data got stored as the "exception throwing line". At that moment the failure is already present in the application so the line can serve the same way an exception would. If the program is too complex to overview how it got to that point a stack trace can be printed to the console by adding the following line (remove this afterwards):
 \begin{lstlisting}
  System.out.println(new Throwable().getStackTrace())
 \end{lstlisting}
-Once the start point has been defined the process is the same as it is for standard Java applications.
 
 \subsection{Focus on the most likely origins}
 
@@ -153,4 +175,17 @@ Once the defect has been found, it can be corrected. Although fixing the defect 
 \begin{enumerate}
   \item If there was no exception thrown and the failure was purely faulty data, it is not enough to have a test case that makes sure that the same error gets reported again, but the developer should also add a check into the program that throws an exception. This is important as it is crucial that faulty data can't be generated by the program.
   \item If the test case was not simplified now is the time to fix that. The developer should shorten the input to the bare minimum that would produce the failure, rename the test case accordingly and add the ticket number as a comment to the test case.
+\end{enumerate}
+
+\subsubsection{A connection to a database was unsuccesful}
+Connection Failures are easily noticable by the discriptive expecption:
+\begin{lstlisting}
+java.net.ConnectException: Connection refused (Connection refused)
+\end{lstlisting}
+Connection issues can happen because of the following reasons:
+\begin{enumerate}
+\item Network issues: Both firewalls need to be setup correctly to allow packets through. This can be checked by starting a simple tcp connection between the two systems with Netcat or a similar program.
+\item Configuration issues: The database has to accept incoming connection requests from the corresponding ip range. This has to be configured in the database settings and varies between different databases.
+\item Flink database adapter: Flink has to support the chosen database or a database connector has to be written. Consult the Flink documentation and check if the adapter version is compatible with the Flink version.
+\item Configuration issue: The IP address that is used in Flink could be wrong or the username and password for the connection.
 \end{enumerate}
