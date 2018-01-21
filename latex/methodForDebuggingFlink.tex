@@ -143,14 +143,14 @@ This step in the debugging process is just a collection of possible points to st
 
 
 \subsection{Exception before application is executed}
-The first caseThe execution tree is not successfully build if any lines before the execute line appear in the stack trace. If that is the case there are mainly two possible scenarios:
+The first case is that the application fails before executing the actual application. This is the case if any of the lines before the execute lines appear in the stack trace. This case can only be possible if an exceptioin was thrown and a stack trace is availble. There are two reasons why such an exception could be thrown:
 
 \begin{itemize}
   \item The application can not connect to the database
   \item Some of the Flink components are incompatible with others.
 \end{itemize}
 
-No matter which of these two is the case the procedure is the same. As the failure happens before any of the Flink specific issues are encountered the method described in the standard "Traffic Approach" \ref{aodZellerInfectionOrigins} is enough to find the root of the problem. This means checking the specified line in the stack trace and checking if the line could be responsible. As Flink applications are only a set of transformations on datastreams this search is relativly easy as it is most probably found either at one of the transformations or at the inital connect to the database.
+No matter which of these two is the case the procedure is the same. As the failure happens before any of the Flink specific issues are encountered the method described in the standard "Traffic Approach" \ref{aodZellerInfectionOrigins} is enough to find the root of the problem. This means going to the specified line in the stack trace and checking if the line could be responsible. As Flink applications are only a set of transformations on datastreams this search is relativly easy as it is most probably found either at one of the transformations or at the inital connect to the database.
 
 \subsection{Exception in a transformation function}
  If on the other hand the execution of the application was successfully started the procedure is a bit different. The origin of the infection lies either in one of the transformations or in the transfer of the data between the data streams. If a transformation is faulty or at least showing sings of the infection it is a good idea to use the line where the transformation was called as the infection origin.
