@@ -141,30 +141,72 @@ In comparison to typical Java applications where automated testing can be quite 
 \subsection{Find possible infection origins}
 This step in the debugging process is just a collection of possible points to start the debug process from. It is always possible to change this point later if the chosen point turns out not to be the origin of the infection. Flink applications are very different to other Java applications in this section. Flink uses a special way to write applications that makes it possible to run on multiple machines without having to specify how and more importantly which information are transfered between different machines. Because of this complication, code that is written in Flink is being executed before a single line piece of information is read. At the end of each application is an execute statement which then starts the application. When debugging the code written by the developer with a debugger the only information that can be gathered is whether or not flink can successfully build the execution tree or not. The only relevant information this provides to the developer is that all checks that Flink itselfs runs before executing are true. At the time of writing this thesis (Flink 1.5) it ensures successful connections to the databases or other data stores used by the application and  compatibality of the used datasources and backend. As an example if a backend that supports snapshots is chosen, Flink will check if the first datasource supports rollbacks as that is a requirement of snapshots. Other problems like incompatible datatypes can still occur afterwards.
 
+this section includes the next step of the traffic approach as Flink applications are strucured in a way that makes it very easy to find the possible origins with the information given here. To make it even easier the word count example from the beginning of the thesis is used again, this time as an actual Flink application:
 
-\subsection{Exception before application is executed}
-The first case is that the application fails before executing the actual application. This is the case if any of the lines before the execute lines appear in the stack trace. This case can only be possible if an exceptioin was thrown and a stack trace is availble. There are two reasons why such an exception could be thrown:
+\lstinputlisting[language=Java]{WordCountFlink.java}
+
+What this program does is the same as the earlier word count example, it counts how often each word is in a specified input. As this is written in the Flink framework it uses streams to store the data and tranformation methods to connect the streams in a way that splits and then counts the words. The first stream is used to gather the incoming data from an apache kafka cluster (Line 5). The data stream is called "text" and is used in the next stream as a source (Line 8). This data stream is called "counts" and is doing the actual work of the program. It uses a flat map function to split the string at each space symbol and uses the newly created "words" to add them to a new String, Integer tuple. Flink then simply adds all these tuples that have the same key together and adds up the Integers. This can be done as the whole transformation method is an extension of the flatMap method that is eventually adding all created tuples together.
+
+\subsubsection{Exception before application is executed}
+The first case that we are going to look at is that the application throws an exeption before it is being executed. This is the case if any of the lines before the execute line appear in the stack trace. In our example the execute line is line 11. so the a possible exception that would fit in this category would be:
+
+\begin{lstlisting}
+java.net.ConnectException: Connection refused (Connection refused)
+  at com.jakobjoachim.WordCountFlink
+  $WordCountFlink.main(WordCountFlink.java:5)
+\end{lstlisting}
+
+As stated above connection problems are not the only issues that can cause an exception before the execute line is reached. It is also possible for some of the Flink components to be incompatible with others. No matter which of these two is the case the procedure is the same. As the failure happens before any of the Flink specific issues are encountered the method described in the standard "Traffic Approach" \ref{aodZellerInfectionOrigins} is enough to find the root of the problem. This means going to the specified line in the stack trace and checking if the line could be responsible. As Flink applications are only a set of transformations on datastreams this search is relativly easy as it is most probably found either at one of the transformations or at the inital connect to the database.
+
+Because of how Flink works in this step there are only two possible roots for an issue in this category. Either the line that throws the exception or the other side. In case of Flink component issues this means the line that sets up the datastream or environment that is being used in the line that is throwing the exception. Because of this it is not necessary to follow the next step of the Traffic Approach (Focus on the most likely origins).
+
+\subsubsection{Exception in a transformation method}
+Another possible case is that an exception was thrown while the application is running. On contaray to exceptions that occur in the datastreams and will not show the line written by the developer in the stack trace, exceptions in transformation methods will show up as the source in the stack trace. If we look at line 23 and 24 in the example application we will see that an error is thrown whenever the word "test" is read. Of course this is set up to throw an error and a real application would be more likely to throw a nullpointer ecxeption or similar when tranforming the data (line 27). When "test" used as part of the input the following stack trace is thrown:
+
+\begin{lstlisting}
+java.lang.Exception
+	at com.jakobjoachim.WordCountFlink
+    $LineSplitter.flatMap(WordCountFlink.java:24)
+	at com.jakobjoachim.WordCountFlink
+    $LineSplitter.flatMap(WordCountFlink.java:14)
+	at org.apache.flink.streaming.api.operators.StreamFlatMap
+    .processElement(StreamFlatMap.java:50)
+	at org.apache.flink.streaming.runtime.tasks
+    .OperatorChain$CopyingChainingOutput
+    .pushToOperator(OperatorChain.java:549)
+  ...
+\end{lstlisting}
+
+The only lines that are part of our code are in this stack trace are the lines in the flatMap method. The stack trace does not show which of our datastreams called the method. This is because the datastream was converted to a flink internal datastream before the application was run. As such the next step is to find out which of our datastreams called the transformation method in question. Possible infection origins are now:
 
 \begin{itemize}
-  \item The application can not connect to the database
-  \item Some of the Flink components are incompatible with others.
+  \item Bug in the code of the flatMap.
+  \item Bug in transfer to the datastream that called the flatMap method.
+  \item Bug in any datastream or transformation of datastream before that.
 \end{itemize}
 
-No matter which of these two is the case the procedure is the same. As the failure happens before any of the Flink specific issues are encountered the method described in the standard "Traffic Approach" \ref{aodZellerInfectionOrigins} is enough to find the root of the problem. This means going to the specified line in the stack trace and checking if the line could be responsible. As Flink applications are only a set of transformations on datastreams this search is relativly easy as it is most probably found either at one of the transformations or at the inital connect to the database.
 
-\subsection{Exception in a transformation function}
+
  If on the other hand the execution of the application was successfully started the procedure is a bit different. The origin of the infection lies either in one of the transformations or in the transfer of the data between the data streams. If a transformation is faulty or at least showing sings of the infection it is a good idea to use the line where the transformation was called as the infection origin.
 
-\subsection{Exception in internal Flink code}
+\subsubsection{Exception in internal Flink code}
 If so far none of the addressed points were successful the problem is most likely the transfer of data between two data streams. In this case the stack trace will not have many useful information as it only points to some Flink internal classes. The only useful information that can be gathered is between which transformations the error occured. It makes sense to use the first of those lines as a starting point.
 
-\subsection{No Exception but resulting data is faulty}
+\subsubsection{No Exception but resulting data is faulty}
 if there is no failure and the resulting data is wrong, the developer can use the line where the false data got stored as the "exception throwing line". At that moment the failure is already present in the application so the line can serve the same way an exception would. If the program is too complex to overview how it got to that point a stack trace can be printed to the console by adding the following line (remove this afterwards):
 \begin{lstlisting}
  System.out.println(new Throwable().getStackTrace())
 \end{lstlisting}
 
 \subsection{Focus on the most likely origins}
+The sample program used at the beginning of this thesis is now used again. Only this time it is actually written with the Flink framework:
+
+
+
+Some lines were removed that are neccessary for the program to work but are not needed to understand what the program is doing. This section will explore how to handle the different cases listed before for finding part is actually responsible.
+
+\subsubsection{subsubsection name}
+
 
 \subsection{Isolate the infection in the chain}
 
@@ -181,6 +223,8 @@ Once the defect has been found, it can be corrected. Although fixing the defect 
 Connection Failures are easily noticable by the discriptive expecption:
 \begin{lstlisting}
 java.net.ConnectException: Connection refused (Connection refused)
+  at com.jakobjoachim.WordCountFlink
+  $WordCountFlink.main(WordCountFlink.java:5)
 \end{lstlisting}
 Connection issues can happen because of the following reasons:
 \begin{enumerate}
