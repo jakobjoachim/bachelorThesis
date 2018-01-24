@@ -219,14 +219,28 @@ Isolating the transformation or data stream that is causing the issue can be don
 If the issue is not obvious it makes sense to use the tool that was developed alongside this thesis that was already briefly mentioned earlier: \ref{mdfBriefIntroTool}. In the same way that the tool is useful when finding corrupted data in the streams it can help us here to gain a deeper understanding into what is happening in each stream. Together whith the reproducable test and tool we should see how the data that is causign the issue got to the transformation in question. We can then correct the defect as we isolated the faulty transformation.
 
 \subsubsection{Exception in internal Flink code}
-With information gained by the previous steps we know which data stream ist most likely responsible. If this issue is reproducable localy it most certainly must be a data type issue. The only other option would be a bug in Flink itself but this is highly unlikely. TODO
+No matter where in the Flink internal code an exception is thrown we can use the information from the log file to find out which data stream was resposible. Then run the program a few more times to make sure the exception is always thrown at the same data stream. The next step is to make sure that the incoming data is the correct and there is no error present beforehand. Also it makes sense to check if the incoming data can be manually added to the test case of the transformation at the faulty data stream. If that also works we know that the root of the infection is in fact the data stream. This is enough to correct the defect. If, on the other hand, one of these checks failed we have to go back a few steps and include the option that a transformation might be faulty depending on which of these checks failed. If the the exception is thrown at different places all the time it makes sense to google the exception to make sure that it is not a common problem with Flink. If it is not use the scientific method to narrow down the search until the root cause is found.
 
 \subsubsection{No Exception but resulting data is faulty}
 We now have a specific location at which the data gets corrupted. To solve the issue the developer has to look at the transformation method that is used by the data stream. The method can then be debugged on its own be writing a unit test for the method and using the normal Java debugger with breakpoints to exactly see what is happening. To make matters even easier in case the method is very complex the developer should still use the same method described in \ref{TODO}
 
 \subsection{Correct the defect}
-TODO
-\subsubsection{A connection to a database was unsuccesful}
+With all the information gained by the previous steps we now know where the issue originates from and we can fix the issue. There are a few possibilities:
+
+\begin{enumerate}
+  \item[mdfCorrectTransformation] Transformation method Faulty
+  \item[mdfCorrectNetwork] Network issues
+  \item[mdfCorrectDataStreams] Data streams are causing the issue
+\end{enumerate}
+
+\subsubsection{Transformation method faulty}
+\label{mdfCorrectTransformation}
+The first step in correcting a failure in a transformation method is to make sure that the unit test checking that method is updated so that the same error can't happen again. Another important thing to rhink about is if such an error would happen again would it be better if the application didn't crash but instead log the error as critical log level and continue on? This could save the company a lot of money in computing cost. It is a good rule of thump that Flink applications should never crash once they are deployed.
+
+\paragraph{Correting the defect} Now that all the prerequirements are done, it is time to actually start correcting the defect. Using the newly written test case and the java debugger we can go through step by step and see at which point the failure appears. Most of this task should already been done by the steps beforehand. If for whatever reason the exact root of the failure could not yet been located, we can use the scientific method to further narrow down the possiblities until the root is found.
+
+\subsubsection{Network issues}
+\label{mdfCorrectNetwork}
 Connection issues are quite common, following these steps should result in a working connection:
 \begin{enumerate}
   \item Network issues: Both firewalls need to be setup correctly to allow packets through. This can be checked by starting a simple tcp connection between the two systems with Netcat or a similar program.
@@ -234,6 +248,15 @@ Connection issues are quite common, following these steps should result in a wor
   \item Flink database adapter: Flink has to support the chosen database or a database connector has to be written. Consult the Flink documentation and check if the adapter version is compatible with the Flink version.
   \item Configuration issue: The IP address that is used in Flink could be wrong or the username and password for the connection.
 \end{enumerate}
+
+\subsubsection{Data streams are incompatible}
+\label{mdfCorrectDataStreams}
+There are two possible reasons why data streams would casue problems. Either they are not compatible, or the data that is transfered in them isn't. Another option that should already have been ruled out is a network issue \ref{mdfCorrectNetwork}. Lastly data could arive at the latter data stream in the wrong order. This is only relevant for some applications as most Flink applications, like the word count example, do not care in which order the input arives.
+\begin{itemize}
+  \item \textbf{Data types} - The developer should make sure that Java generics are used at every appropriate location. This ensures compatibility of the data types because the java compiler checks them.
+  \item \textbf{Data streams not compatible} - The developer should check the documentation of each of the used data stream features to make sure both are compatible. Lastly if that failed also check that the Backend is compatible in the same way.
+  \item \textbf{Data in wrong order} - TODO
+\end{itemize}
 
 \subsubsection{Conclusion}
 Although fixing the defect is the reason the whole debugging process was started it is not the end. As explained in the \ref{aodZellerCorrectDefect} other questions need to be answered before the developer can move on to something else.

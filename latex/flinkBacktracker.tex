@@ -9,6 +9,23 @@ This chapter will explain in detail how the Flink Backtracking tool written alon
 \section{User manual}
 \label{fbManual}
 
+\paragraph{Prerequirements} There are a few prerequirements that have to be met to make the progrgam work appropriatly. First and foremost it has to be a Flink application as it can only track Flink data streams. Also because it is using the watchpoint mechanism of Flink all requiremts that go along with that have to be met. This means each datastream has to support rolling back data in cases of a failure. Because of this requirement it is currently only possible to use data that comes from some sort of big data storage. In the following examples we will use Apache Kafka.
+
+Using the program is an easy process. One has to download the jar and include it in the application. There is only one line needed to enable the tool itself, although checkpointing still has to be enabled manually:
+
+\begin{lstlisting}
+env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);
+env.enableCheckpointing(1000);
+FlinkBacktrack backtracker = new FlinkBacktrack(env);
+\end{lstlisting}
+
+Where "env" is the Execution Environment. Once the Backtracker is initilised it can be used by adding each datastream that the developer wants to be watched to the tool. This is done in the following way:
+
+\begin{lstlisting}
+backtracker.track(dataStream);
+\end{lstlisting}
+
+Where "dataStream" is the dataStream that should be tracked. This step has to be repeated for each data stream that should be watched.
 
 \section{Backend architecture}
 \label{fbBackend}
