@@ -228,9 +228,9 @@ We now have a specific location at which the data gets corrupted. To solve the i
 With all the information gained by the previous steps we now know where the issue originates from and we can fix the issue. There are a few possibilities:
 
 \begin{enumerate}
-  \item[mdfCorrectTransformation] Transformation method Faulty
-  \item[mdfCorrectNetwork] Network issues
-  \item[mdfCorrectDataStreams] Data streams are causing the issue
+  \item[\ref{mdfCorrectTransformation}] Transformation method Faulty
+  \item[\ref{mdfCorrectNetwork}] Network issues
+  \item[\ref{mdfCorrectDataStreams}] Data streams are causing the issue
 \end{enumerate}
 
 \subsubsection{Transformation method faulty}
@@ -243,6 +243,7 @@ The first step in correcting a failure in a transformation method is to make sur
 \label{mdfCorrectNetwork}
 Connection issues are quite common, following these steps should result in a working connection:
 \begin{enumerate}
+  \item Insufficient number of network buffers: If this exception is thrown it means that the jvm size is too small for the amount of parallism that is happening. It can be fixed by increasing buffer in the taskmanager settings. Refer to the Flink documentation for further details: /cite{TODO}.
   \item Network issues: Both firewalls need to be setup correctly to allow packets through. This can be checked by starting a simple tcp connection between the two systems with Netcat or a similar program.
   \item Configuration issues: The database has to accept incoming connection requests from the corresponding ip range. This has to be configured in the database settings and varies between different databases.
   \item Flink database adapter: Flink has to support the chosen database or a database connector has to be written. Consult the Flink documentation and check if the adapter version is compatible with the Flink version.
@@ -255,7 +256,7 @@ There are two possible reasons why data streams would casue problems. Either the
 \begin{itemize}
   \item \textbf{Data types} - The developer should make sure that Java generics are used at every appropriate location. This ensures compatibility of the data types because the java compiler checks them.
   \item \textbf{Data streams not compatible} - The developer should check the documentation of each of the used data stream features to make sure both are compatible. Lastly if that failed also check that the Backend is compatible in the same way.
-  \item \textbf{Data in wrong order} - TODO
+  \item \textbf{Data in wrong order} - Applications that depend on data being in the correct order to be processed correctly need to use the "event time watermark" feature which can add a watermark to each piece of data and check if the previous one was processed or not before doing any more work. Because this adds a lot of waiting time and additional comoputing to the process it has to be enabled manually and also implemented at the specific transformations. Watermarks have to be injected at the first data source and can be used afterwards.
 \end{itemize}
 
 \subsubsection{Conclusion}
