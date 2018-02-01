@@ -11,7 +11,7 @@ Flink applications have a simple base structure that is used by the developer. E
 \begin{figure}[h!]
     \centering
       \includegraphics[width=0.9\textwidth]{rw_simpleDataflowInFlink.png}
-      \caption{Simple Dataflow in Flink}
+      \caption{Simple Dataflow in Flink \cite{ApacheFlinkSimpleDataflowFigure}}
       \label{simpleDataflowInFlink}
 \end{figure}
 
@@ -22,7 +22,7 @@ Until now the system can only be distributed by having the different tasks on di
 \begin{figure}[h!]
     \centering
       \includegraphics[width=0.9\textwidth]{rw_distributedDataflowInFlink.png}
-      \caption{Distributed Dataflow in Flink}
+      \caption{Distributed Dataflow in Flink \cite{ApacheFlinkParallelDataflowFigure}}
       \label{distributedDataflowInFlink}
 \end{figure}
 
@@ -90,7 +90,7 @@ They give an overview of seven approaches that can help build, validate and debu
 
 \paragraph{Model Checking} is a form of testing that automates the testing process somewhat by checking every possible input up to some upper bound in a predefined way. The way the model checker works depends completely on the model checker itself, as there are a lot of different options available. There are for example symbolic model checkers available that explore possible executions mathematically or black-box checkers that just run the application with various inputs. Model checking can be helpful as it can cover much more ground than manually written tests, as well as check parts of the application developers, might not have thought of.
 
-\paragraph{Theorem proving} is a mathematical method of proving that the distributed system is free of defects even before writing a single line of code. It is mostly used for proving that the core of a new application is bug-free before spending lots of time building an application that might not work properly.
+\paragraph{Theorem proving} is a mathematical method of proving that the distributed system is free of defects even before writing a single line of code. It is mostly used for proving that the core of a new application is bug-free before spending lots of time building an application that might not work properly. Amazon is one of the companies using it and released a paper about it as well: \cite{Newcombe:2015:AWS:2749359.2699417}
 
 \paragraph{Record and Replay} is a method for analysing a single execution of the application to gain insight into why an error occurs in a system that has non-deterministic events, as these change every time the program is run even with if the same input values are used.
 

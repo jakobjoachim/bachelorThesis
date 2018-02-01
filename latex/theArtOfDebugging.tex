@@ -2,9 +2,9 @@ As debugging of traditional programs is in many ways similar to debugging Flink 
 
 \section{Word Count Application}
 \label{wordCountApplication}
-This section quickly outlines the "Word Count Application" that is used in the thesis as an example. The Application counts how often each word is in a specific text and returns the results to the command line. An example run of the program would be:
+This section quickly outlines the "WordCount Application" that is used in the thesis as an example. The Application counts how often each word is in a specific text and returns the results to the command line. An example run of the program would be:
 
-\begin{lstlisting}
+\begin{lstlisting}[caption={WordCount Result}]
   $ java -jar wordCountSimple.jar "Hello hello how do you do"
   how: 1
   hello: 2
@@ -13,7 +13,6 @@ This section quickly outlines the "Word Count Application" that is used in the t
 \end{lstlisting}
 
 Note that the application ignores capital letters in the input. This will be relevant later on.
-
 \section{The Java Debugger}
 
 Flink applications are very complex Java or Scala programs that still share a lot of the characteristics of typical Java programs. As such most methods of debugging Java still apply to Flink and should be used. This chapter will outline some of the ways that help Java developers to find their bugs faster and with less of a hassle.
@@ -106,7 +105,7 @@ The simplification is not only essential for building test cases but also helpfu
 It is understandable to ask why to write a test when it is already known where the bug is originating from. The developer only has to fix the problem and manually test the program once, what good is a test case here?
 It is important to understand that finding a problem is giving a lot of valuable information to the developer he might not even realise. We can assume that if the problem got into the code once it might get into the code again. The only way to make sure it does not is to give the developer an immediate feedback when the problem occurs again. As well as helping the Developer in the future it can assist the developer while writing the fix to quickly test if the fix worked or not without having to manually start the application and reproduce the problem all over again.
 
-\lstinputlisting[language=Java]{WordCountBug.java}
+\lstinputlisting[language=Java, caption={Word Count Example}]{WordCountBug.java}
 
 \subsection{Find possible infection origins}
 Once the failure can be reproduced easily, it is time to search for what part of the code is responsible for the failure. This is often the hardest part of debugging. To make finding easier for the developer the traffic approach suggests to use backtracking to find the relevant piece of code. Backtracking is done by starting at the manifestation of the error, meaning if the program fails with an exception, the line noted in the exception. If the program just produces an unwanted or wrong value, the line is used where that value was returned. Once a starting point is found the next step is to back track all active and passive usages of the variable. As failures can quickly propagate through the application it unfortunately not enough to only look at the variable that was causing the exception we have to also look at all other variables that interact with the first variable and so on. Lines that don't use the variable can be omitted as they cannot be responsible for the failure.  The information gained by this technique should be displayed by a control flow graph to make them easier to understand. The graph can often be omitted but should be used once the problem space gets too big to handle without a graph.

@@ -17,12 +17,12 @@ The Unix philosophy is defined by Doug McIlroy, the inventor of the Unix pipe as
   \item Use tools in preference to unskilled help to lighten a programming task, even if you have to detour to build the tools and expect to throw some of them out after you've finished using them.
 \end{enumerate}
 
-Most of the points mentioned here are of some relevance for Flink programming as well. Each task should do one job and do it well. The next paragraph will look into why that is. The second point is necessary by default in Flink, each task has to use the provided streams to work. The third point is equally important if not more important in Flink applications as it is in Unix programs. Always test each Task individually to make sure it works as designed and has no flaws on its own, only then can the whole application work without any problems.
+Most of the points mentioned here are of some relevance for Flink programming as well. Each task should do one job and do it well. The next paragraph will look into why that is. The second point is necessary by default in Flink; each task has to use the provided streams to work. The third point is equally important if not more important in Flink applications as it is in Unix programs. Always test each Task individually to make sure it works as designed and has no flaws on its own, only then can the whole application work without any problems.
 
 Dividing the program into various modules has a lot of advantages:
 \begin{enumerate}
   \item Easier to Develop - It is much simpler to develop a smaller application as it is much harder to lose track of what each piece of code should do. This reduced complexity in return reduces the likelihood of mistakes. Once the program is completed, it results in a more stable program that can be debugged easier.
-  \item Better Distribution -  As every Flink task can run on a different computer the smaller the tasks are, the better the Flink Job Manager can distribute the load evenly between the available resources.
+  \item Better Distribution -  As every Flink task can run on a different computer the smaller the tasks are, the better the Flink Job Manager can distribute the load evenly among the available resources.
   \item Checkpoints are easy to find - Checkpoints are a core piece of Flink technology. It allows the framework not only to jump back and repeat a failed run without having to restart the whole application but also provides information about which state the application is currently in. This is extremely helpful as a lot of Flink applications only end when the program is cancelled by the user.
 \end{enumerate}
 
@@ -33,7 +33,7 @@ It should now be understandable that the programs should be divided into multipl
 
 \paragraph{Why are too many tasks bad?} When there are too many tasks, it gets even more complicated than when everything would be in its task as basically every line of code would be in a different place. Additionally, it wouldn't increase the performance as each task has some initialisation work that would diminish the performance gain achieved by distributing it perfectly.
 
-It makes sense to use the Unix philosophy of having one task do one thing. In most cases there are some obvious choices as in most Flink programs data is modified or analysed each task could be one transformation of the data. It should also be stated that when ever possible the pre-existing transformation functions of the Flink framework should be used. Only in rare situations is it necessary to implement your own data transformation classes. The predefined classes have the advantage of being extensively tested in different conditions thus the risk of data going missing is extremely low.
+It makes sense to use the Unix philosophy of having one task do one thing. In most cases there are some obvious choices as in most Flink programs data is modified or analysed each task could be one transformation of the data. It should also be stated that whenever possible, the pre-existing transformation functions of the Flink framework should be used. Only in rare situations is it necessary to implement your own data transformation classes. The predefined classes have the advantage of being extensively tested in different conditions thus the risk of data going missing is extremely low.
 
 \subsection{Metrics}
 Now that the architecture of the program is done the next question is what metrics to use in which positions to achieve the optimal security.
@@ -53,7 +53,7 @@ Logging in Flink is straightforward and can is used the same as in every other j
 
 \section{The Debugging Process}
 
-There are multiple reasons how an error might be discovered, the most common one being an exception in a log file. Another option is that the end user of the results finds that some of the results are incorrect. Both of these cases require slightly different handling. An excellent way to start the debug process is by using a modified version of the Traffic approach introduced in \ref{aodZeller}.
+There are multiple reasons how an error might be discovered; the most common one is an exception in a log file. Another option is that the end user of the results finds that some of the results are incorrect. Both of these cases require slightly different handling. An excellent way to start the debug process is by using a modified version of the Traffic approach introduced in \ref{aodZeller}.
 
 \subsection{Track the Problem in the database}
 Tracking a problem is essential in every development cycle no matter in which language or with what framework and Flink is no exception. It is crucial for every developer to track the status of problems in Flink applications as it helps to minimise work. Along the already mentioned advantages in chapter \ref{aodZellerTrack}, like having an easily accessible database of open problems and knowing which problems are more important than others, tracking the problems of Flink applications offers some other advantages as well.
@@ -65,7 +65,7 @@ Tracking a problem is essential in every development cycle no matter in which la
   \item Which subtask of what task manager failed which allows seeing if problems only occur on one machine.
 \end{enumerate}
 
-To achieve these advantages the tracking database needs additionally to the already mentioned fields in \ref{aodZellerTrack} a few additional columns. As soon as a problem is experienced the current log files should be saved so that it is easy for the developer to find the relevant lines in the log file even if he starts debugging months later. Secondly, for the same reason, all appropriate metrics should be saved as well.
+To achieve these advantages, the tracking database needs additionally to the already mentioned fields in \ref{aodZellerTrack} a few additional columns. As soon as a problem is experienced the current log files should be saved so that it is easy for the developer to find the relevant lines in the log file even if he starts debugging months later. Secondly, for the same reason, all appropriate metrics should be saved as well.
 
 The resulting columns now are:
 
@@ -106,7 +106,7 @@ This section will use the word count application as an example program to debug.
 \begin{lstlisting}
   hello - 3, flink - 1, one - 1, two - 2
 \end{lstlisting}
-  Each word has the count of the next word. So this would be considered as the second case "everything is faulty" even though the word "one" has the correct answer. This is important to note as sometimes a fault in a program can still result in a correct result. This first question just differentiates between a few faults and a majority of faults, so the debugging developer has to look at the whole picture and see if the majority of data is corrupt. An example for only a few faults would be:
+  Each word has the count of the next word. So this would be considered as the second case "everything is faulty" even though the word "one" has the correct answer. This is important to note as sometimes a fault in a program can still result in a correct result. This first question just differentiates between a few faults and a majority of faults, so the debugging developer has to look at the whole picture and see if the majority of data is corrupt. An example of only a few faults would be:
 \begin{lstlisting}
  Hello - 1, hello - 1, flink - 3, one - 1, two - 1
 \end{lstlisting}
@@ -117,7 +117,7 @@ Here only one additional word was counted ("Hello").
 
 \paragraph{} The last step before moving on to the next section is to make sure that the reproduction works. There is little to no use in finding something in the code that is supposedly the problem only to find out later that the problem is something else.
 
-\paragraph{} The fault should now be reproducible on a local machine as the affecting test data was found. The only fault that remains are problems that only occur on the remote network and are not happening because of differing incoming data. In almost all cases the root of these problems is either incompatible Flink components or network issues. So before starting a more complex search for the problem the developer should check the Flink documentation if all used components, like data sources, the chosen backend etc. are compatible with each other. Furthermore it makes sense to check if all of the running systems can send packages to each other and the database as firewalls and other network related issues could be the issue. If none of these are quickly found it is recommended to use the scientific method described in: \ref{aodZellerIsolateDefect}
+\paragraph{} The fault should now be reproducible on a local machine as the affecting test data was found. The only fault that remains are problems that only occur on the remote network and are not happening because of differing incoming data. In almost all cases the root of these problems is either incompatible Flink components or network issues. So before starting a more complex search for the problem the developer should check the Flink documentation if all used components, like data sources, the chosen backend etc. are compatible with each other. Furthermore, it makes sense to check if all of the running systems can send packages to each other and the database as firewalls and other network related issues could be the issue. If none of these are quickly found it is recommended to use the scientific method described in: \ref{aodZellerIsolateDefect}
 
 \subsubsection{Exception in log file}
 The most common way to discover a failure in a program is by discovering an exception. It makes no difference if this exception was found in a log file or directly in the developer's console. The steps that are necessary to reproduce these errors are often easier as well.
@@ -135,46 +135,75 @@ In most cases, the developer should have no problem reproducing the error easily
 \subsection{Automate and simplify the test case}
 In comparison to typical Java applications where automated testing can be quite tricky as a graphical user interface, and user interaction is involved, automating the test cases for Flink applications is quite easy assuming that the problem is reproducible on a local machine. All that the developer has to do is take the result of the last section and write a test with the specific start parameters. The "Traffic Approach" also suggests simplifying the test case to be as easy to implement as possible so that only the error and nothing else gets checked. This can be useful to make it easier to help spot the problem in the code later on but is not needed for Flink applications. For example, if the word count application were to crash on "-" characters and the input test case would be an entire book page of words it makes it harder later on to find the actual character that is causing the fault but makes it easier to create the test case. As understanding the problem and simplifying the test case is mostly the same it makes sense to leave the test case long and rebuild it once the failure is understood. This way if the same mistake gets built into the code again it is easily spottable as the test case already has a descriptive name, description as well as a ticket number associated with it. Another developer could then easily reproduce the steps that were taken to solve the problem the last time.
 
+\paragraph{Flink Spector} The problem with running the whole application in a test case is that there is a lot of overhead. The whole application has to be built the different task manager are started all to run the program with one input. The worst part about this process is that it does not even eliminate all the failures as the execution environment differs (because it is executed locally) as well as the source of the application (because data is provided by the test case instead of the data store) and lastly the sink (because the data is not actually saved). The only information that is gained this way is that the transformations are doing what they are supposed to do. This could be much easier done if data streams could be tested individually without having all the overhead of starting Flink. The Otto Group had this issue and decided to write a plugin for Flink that allows data streams to be unit tested called the \cite{FlinkSpector}. It can be used in the following way once the plugin is enabled:
+
+\begin{lstlisting}[caption={FlinkSpector Example: \cite{FlinkSpector}}]
+@org.junit.Test
+public void testWindowing() {
+
+// Define the input DataStream:
+DataStream<Tuple2<Integer, String>> testStream =
+    createTimedTestStreamWith(Tuple2.of(1, "fritz"))
+        .emit(Tuple2.of(1, "hans"))
+        .emit(Tuple2.of(1, "heidi"), intoWindow(30, seconds)
+        .emit(Tuple2.of(3, "peter"), intoWindow(1, minutes)
+        .repeatAll(times(2))
+        .close();
+
+// Lets you query the output tuples like a table:
+OutputMatcher<Tuple2<Integer, String>> matcher =
+    //define keys for the values in your tuple:
+    new MatchTuples<Tuple2<Integer, String>>("value", "name")
+        .assertThat("value", is(3))
+        .assertThat("name", either(is("fritz")).or(is("peter")))
+        .onEachRecord();
+
+assertStream(someWindowAggregation(testStream), matcher);
+}
+\end{lstlisting}
+
+Put simply the developer has to create a test data stream of incoming data and the similar thing for the data returned by the transformation. Once those are created the unit test is the same and can be used with the "assertStream" method call (Line 22).
+
 \subsection{Find possible infection origins}
-This step in the debugging process is just a collection of possible points to start the debug process from. It is always possible to change this point later if the chosen point turns out not to be the origin of the infection. Flink applications are very different to other Java applications in this section. Flink uses a special way to write applications that makes it possible to run on multiple machines without having to specify how and more importantly which information are transfered between different machines. Because of this complication, code that is written in Flink is being executed before a single line piece of information is read. At the end of each application is an execute statement which then starts the application. When debugging the code written by the developer with a debugger the only information that can be gathered is whether or not flink can successfully build the execution tree or not. The only relevant information this provides to the developer is that all checks that Flink itselfs runs before executing are true. At the time of writing this thesis (Flink 1.5) it ensures successful connections to the databases or other data stores used by the application and  compatibality of the used datasources and backend. As an example if a backend that supports snapshots is chosen, Flink will check if the first datasource supports rollbacks as that is a requirement of snapshots. Other problems like incompatible datatypes can still occur afterwards.
+This step in the debugging process is just a collection of possible points to start the debug process from. It is always possible to change this point later if the chosen point turns out not to be the origin of the infection. Flink applications are very different to other Java applications in this section. Flink uses a special way to write applications that make it possible to run on multiple machines without having to specify how and more importantly which information are transferred between different machines. Because of this complication, code that is written in Flink is being executed before a single line piece of information is read. At the end of each application is an execute-statement which then starts the application. When debugging the code written by the developer with a debugger the only information that can be gathered is whether or not flink can successfully build the execution tree or not. The only relevant information this provides to the developer is that all checks that Flink itself runs before executing are true. At the time of writing this thesis (Flink 1.5), it ensures successful connections to the databases or other data stores used by the application and compatibality of the used data sources and backend. As an example, if a backend that supports snapshots is chosen, Flink will check if the first data source supports rollbacks as that is a requirement of snapshots. Other problems like incompatible datatypes can still occur afterwards.
 
-this section includes the next step of the traffic approach as Flink applications are strucured in a way that makes it very easy to find the possible origins with the information given here. To make it even easier the word count example from the beginning of the thesis is used again, this time as an actual Flink application:
+This section includes the next step of the traffic approach as Flink applications are structured in a way that makes it very easy to find the possible origins of the information given here. To make it even easier the word count example from the beginning of the thesis is used again, this time as an actual Flink application:
 
-\lstinputlisting[language=Java]{WordCountFlink.java}
+\lstinputlisting[language=Java,caption={Word Count Example Flink}]{WordCountFlink.java}
 
-What this program does is the same as the earlier word count example, it counts how often each word is in a specified input. As this is written in the Flink framework it uses streams to store the data and tranformation methods to connect the streams in a way that splits and then counts the words. The first stream is used to gather the incoming data from an apache kafka cluster (Line 5). The data stream is called "text" and is used in the next stream as a source (Line 8). This data stream is called "counts" and is doing the actual work of the program. It uses a flat map function to split the string at each space symbol and uses the newly created "words" to add them to a new String, Integer tuple. Flink then simply adds all these tuples that have the same key together and adds up the Integers. This can be done as the whole transformation method is an extension of the flatMap method that is eventually adding all created tuples together.
+What this program does is the same as the earlier word count example, it counts how often each word is in a specified input. As this is written in the Flink framework, it uses streams to store the data and transformation methods to connect the streams in a way that splits and then counts the words. The first stream is used to gather the incoming data from an Apache Kafka cluster (Line 5). The data stream is called "text" and is used in the next stream as a source (Line 8). This data stream is called "counts" and is doing the actual work of the program. It uses a flat map function to split the string at each space symbol and uses the newly created "words" to add them to a new String, Integer tuple. Flink then adds merely all these tuples that have the same key together and adds up the Integers. This can be done as the whole transformation method is an extension of the flatMap method that is eventually adding all created tuples together.
 
 \subsubsection{Exception before application is executed}
-The first case that we are going to look at is that the application throws an exeption before it is being executed. This is the case if any of the lines before the execute line appear in the stack trace. In our example the execute line is line 11. so the a possible exception that would fit in this category would be:
+The first case that we are going to look at is that the application throws an exception before it is being executed. This is the case if any of the lines before the execute line appear in the stack trace. In our example the execute line is line 11. so the possible exception that would fit in this category would be:
 
-\begin{lstlisting}
+\begin{lstlisting}[caption={Connection Exception}]
 java.net.ConnectException: Connection refused (Connection refused)
   at com.jakobjoachim.WordCountFlink
   $WordCountFlink.main(WordCountFlink.java:5)
 \end{lstlisting}
 
-As stated above connection problems are not the only issues that can cause an exception before the execute line is reached. It is also possible for some of the Flink components to be incompatible with others. No matter which of these two is the case the procedure is the same. As the failure happens before any of the Flink specific issues are encountered the method described in the standard "Traffic Approach" \ref{aodZellerInfectionOrigins} is enough to find the root of the problem. This means going to the specified line in the stack trace and checking if the line could be responsible. As Flink applications are only a set of transformations on datastreams this search is relativly easy as it is most probably found either at one of the transformations or at the inital connect to the database.
+As stated above connection problems are not the only issues that can cause an exception before the execute line is reached. It is also possible for some of the Flink components to be incompatible with others. No matter which of these two is the case the procedure is the same. As the failure happens before any of the Flink specific issues are encountered the method described in the standard "Traffic Approach" \ref{aodZellerInfectionOrigins} is enough to find the root of the problem. This means going to the specified line in the stack trace and checking if the line could be responsible. As Flink applications are only a set of transformations on data streams, this search is relatively easy as it is most probably found either at one of the transformations or the initial connection to the database.
 
-Because of how Flink works in this step there are only two possible roots for an issue in this category. Either the line that throws the exception or the other side. In case of Flink component issues this means the line that sets up the datastream or environment that is being used in the line that is throwing the exception. Because of this it is not necessary to follow the next step of the Traffic Approach (Focus on the most likely origins).
+Because of how Flink works in this step there are only two possible roots for an issue in this category. Either the line that throws the exception or the other side. In case of Flink component issues, this means the line that sets up the data stream or environment that is being used in the line that is throwing the exception. Because of this, it is not necessary to follow the next step of the Traffic Approach (Focus on the most likely origins).
 
 \subsubsection{Exception in a transformation method}
-Another possible case is that an exception was thrown while the application is running. On contaray to exceptions that occur in the datastreams and will not show the line written by the developer in the stack trace, exceptions in transformation methods will show up as the source in the stack trace. If we look at line 23 and 24 in the example application we will see that an error is thrown whenever the word "test" is read. Of course this is set up to throw an error and a real application would be more likely to throw a nullpointer ecxeption or similar when tranforming the data (line 27). When "test" used as part of the input the following stack trace is thrown:
+Another possible case is that an exception was thrown while the application is running. On contrary to exceptions that occur in the datastreams and will not show the line written by the developer in the stack trace, exceptions in transformation methods will show up as the source in the stack trace. If we look at line 23 and 24 in the example application, we will see that an error is thrown whenever the word "test" is read. Of course, this is set up to throw an error, and a real application would be more likely to throw a null pointer exception or similar when transforming the data (line 27). When "test" used as part of the input the following stack trace is thrown:
 
-\begin{lstlisting}
+\begin{lstlisting}[caption={Exception in Transformation}]
 java.lang.Exception
-	at com.jakobjoachim.WordCountFlink
+    at com.jakobjoachim.WordCountFlink
     $LineSplitter.flatMap(WordCountFlink.java:24)
-	at com.jakobjoachim.WordCountFlink
+    at com.jakobjoachim.WordCountFlink
     $LineSplitter.flatMap(WordCountFlink.java:14)
-	at org.apache.flink.streaming.api.operators.StreamFlatMap
+    at org.apache.flink.streaming.api.operators.StreamFlatMap
     .processElement(StreamFlatMap.java:50)
-	at org.apache.flink.streaming.runtime.tasks
+    at org.apache.flink.streaming.runtime.tasks
     .OperatorChain$CopyingChainingOutput
     .pushToOperator(OperatorChain.java:549)
   ...
 \end{lstlisting}
 
-The only lines that are part of our code in this stack trace are the lines in the flatMap method. The stack trace does not show which of our datastreams called the method. This is because the datastream was converted to a flink internal datastream before the application was run. As such the next step is to find out which of our datastreams called the transformation method in question. Possible infection origins are now:
+The only lines that are part of our code in this stack trace are the lines in the flatMap method. The stack trace does not show which of our datastreams called the method. This is because the data stream was converted to a flink internal data stream before the application was run. As such the next step is to find out which of our datastreams called the transformation method in question. Possible infection origins are now:
 
 \begin{itemize}
   \item Bug in the code of the flatMap.
@@ -182,50 +211,50 @@ The only lines that are part of our code in this stack trace are the lines in th
   \item Bug in any data stream or transformation of data streams before that.
 \end{itemize}
 
-Failure in transfers between data streams are highly unlikely when the program can be reproduced localy as any incompatible data types and components are already checked. Although this is only true if Java generics were used with all appropriate variables. These possible infection origins are enough to uses as a basis for the next section called "Isolate the defect in the chain" \ref{mdfIsolateInfection}.
+Failures in transfers between data streams are highly unlikely when the program can be reproduced locally as any incompatible data types and components are already checked. Although this is only true if Java generics were used with all appropriate variables. These possible infection origins are enough to uses as a basis for the next section called "Isolate the defect in the chain" \ref{mdfIsolateInfection}.
 
 \subsubsection{Exception in internal Flink code}
-The last possible location to throw an exception is the internal FLink code itself. This can have a lot of possible reasons and the least amount of helpful information in the stack trace. One possible reason could be a timeout while sending data from one machine to the other. The exception will show that some sort of network timeout was the cause but there is not much else in the stack trace that can help the developer narrow down the search. This is why logging correctly is crucial in this section as the most relevant pieces of information are which data stream was responsible. The log file contains such information and can be seen either directly by reading the log or by using the Flink web ui if it is used.
+The last possible location to throw an exception is the internal FLink code itself. This can have a lot of possible reasons and the least amount of helpful information in the stack trace. One possible reason could be a timeout while sending data from one machine to the other. The exception will show that a network timeout was the cause, but there is not much else in the stack trace that can help the developer narrow down the search. This is why logging correctly is crucial in this section as the most relevant pieces of information are which data stream was responsible. The log file contains such information and can be seen either directly by reading the log or by using the Flink web UI if it is used.
 
-\paragraph{} We should now know which datastream is causing the exception but possibly, depending on the thrown exception, not why. This step of the debugging process requires a lot of understanding of how Flink and the program that is being debuged works. There are a lot of different reasons why an internal exception might be thrown. The good news is that it is very unlikely that the fault is somewhere else in the code and that the data stream that is throwing the exception is working fine. In almost all cases the it is either the data stream throwing the exception or the transfer to that data stream. Because of that we can use the datastream line as our infection root for now.
+\paragraph{} We should now know which data stream is causing the exception but possibly, depending on the thrown exception, not why. This step of the debugging process requires a lot of understanding of how Flink and the program that is being debugged works. There are a lot of different reasons why an internal exception might be thrown. The good news is that it is improbable that the fault is somewhere else in the code and that the data stream that is throwing the exception is working fine. In almost all cases it is either the data stream throwing the exception or the transfer to that data stream. Because of that, we can use the datastream line as our infection root for now.
 
 \subsubsection{No Exception but resulting data is faulty}
-if there is no failure and the resulting data is wrong, the developer can use the line where the false data got stored as the "exception throwing line". At that moment the failure is already present in the application so the line can serve the same way an exception would. If the program is too complex to overview how it got to that point a stack trace can be printed to the console by adding the following line (remove this afterwards):
-\begin{lstlisting}
+If there is no failure and the resulting data is wrong, the developer can use the line where the false data got stored as the "exception throwing line". At that moment the failure is already present in the application so the line can serve the same way an exception would. If the program is too complex to overview how it got to that point a stack trace can be printed to the console by adding the following line (remove this afterwards):
+\begin{lstlisting}[caption={Create Stacktrace}]
  System.out.println(new Throwable().getStackTrace())
 \end{lstlisting}
 
 \paragraph{Brief introduction to the Flink Backtracking tool}
 \label{mdfBriefIntroTool}
 
-To narrow down the search to a line that might actually be responsible the developer can use the tool that was designed alongside this thesis and is explained in detail in chapter \ref{TODO}. The tool allows the developer to see the content of the data streams in real time and also shows the relation between the data and multiple data streams. This is done by using  the Flink watchpoint mechanism to split the inputs into groups. In the Word Count example which has two data streams this would result to the following with an example input of "this is a test this is a test is this a test?":
+To narrow down the search to a line that might be responsible the developer can use the tool that was designed alongside this thesis and is explained in detail in chapter \ref{TODO}. The tool allows the developer to see the content of the data streams in real time and also shows the relation between the data and multiple data streams. This is done by using the Flink watchpoint mechanism to split the inputs into groups. In the WordCount example which has two data streams, this would result in the following with an example input of "this is a test this is a test is this a test?":
 
 \begin{itemize}
   \item \textbf{Data stream 1 - Watchpoint 2321:} "this is a find this is a find", \textbf{Watchpoint 2346:} "is this a find?"
   \item \textbf{Data stream 2 - Watchpoint 2321:} "this - 2, is - 2, a - 2, find - 2", \textbf{Watchpoint 2346:} "is - 3, this - 3, a - 3, find? - 1"
 \end{itemize}
 
-If this was part of a bigger input in a more complex program the developer might not have seen directly why the word "find" was only counted two times when it was cleary in the input three times. Because he now has a direct overview of what data transformation happend at which point he can easily spot at which transformation the failure is firstly observable and use that as the infection origin.
+If this was part of a more significant input in a more complex program, the developer might not have seen directly why the word "find" was only counted two times when it was cleary in the input three times. Because he now has a direct overview of what data transformation happened at which point he can easily spot at which transformation the failure is firstly observable and use that as the infection origin.
 
 \subsection{Isolate the infection in the chain}
 \label{mdfIsolateInfection}
-Now that the root of the infection was narrowed down to a few possible lines of code it is time to isolate these lines to see if they are in fact the cause of the issue or merley another infected line.
+Now that the root of the infection was narrowed down to a few possible lines of code it is time to isolate these lines to see if they are in fact the cause of the issue or merely another infected line.
 
-It is yet again necessary to split this section into multiple parts depending on which kind of infection is present. We can skip this chapter altogether for exceptions before the the applicaton is executed because we already know for sure which line is causing the issue and only have to correct the defect.
+It is yet again necessary to split this section into multiple parts depending on which kind of infection is present. We can skip this chapter altogether for exceptions before the applicaton is executed because we already know for sure which line is causing the issue and only have to correct the defect.
 
 \subsubsection{Exception in a transformation method}
-Isolating the transformation or data stream that is causing the issue can be done by firstly looking at the exception it self. It might be obvious that the the line showing up in the stack trace is resposible or that such an exception should never be allowed to crash the program. Another important step while finding the issue is to make sure that exceptions that crash the application are only doing so when there is no other way. It might be possible to log the exception and ignore that part of the input as long as the program can continue running. Most Flink applications run on huge server farms where each hour costs the company a lot of money so full applicaton crashes should be minimized.
+Isolating the transformation or data stream that is causing the issue can be done by firstly looking at the exception itself. It might be obvious that the line showing up in the stack trace is responsible or that such an exception should never be allowed to crash the program. Another important step while finding the issue is to make sure that exceptions that crash the application are only doing so when there is no other way. It might be possible to log the exception and ignore that part of the input as long as the program can continue running. Most Flink applications run on huge server farms where each hour costs the company a lot of money so full application crashes should be minimised.
 
-If the issue is not obvious it makes sense to use the tool that was developed alongside this thesis that was already briefly mentioned earlier: \ref{mdfBriefIntroTool}. In the same way that the tool is useful when finding corrupted data in the streams it can help us here to gain a deeper understanding into what is happening in each stream. Together whith the reproducable test and tool we should see how the data that is causign the issue got to the transformation in question. We can then correct the defect as we isolated the faulty transformation.
+If the issue is not apparent, it makes sense to use the tool that was developed alongside this thesis that was already briefly mentioned earlier: \ref{mdfBriefIntroTool}. In the same way that the tool is useful when finding corrupted data in the streams it can help us here to gain a deeper understanding of what is happening in each stream. Together with the reproducible test and tool, we should see how the data that is causing the issue got to the transformation in question. We can then correct the defect as we isolated the faulty transformation.
 
 \subsubsection{Exception in internal Flink code}
-No matter where in the Flink internal code an exception is thrown we can use the information from the log file to find out which data stream was resposible. Then run the program a few more times to make sure the exception is always thrown at the same data stream. The next step is to make sure that the incoming data is the correct and there is no error present beforehand. Also it makes sense to check if the incoming data can be manually added to the test case of the transformation at the faulty data stream. If that also works we know that the root of the infection is in fact the data stream. This is enough to correct the defect. If, on the other hand, one of these checks failed we have to go back a few steps and include the option that a transformation might be faulty depending on which of these checks failed. If the the exception is thrown at different places all the time it makes sense to google the exception to make sure that it is not a common problem with Flink. If it is not use the scientific method to narrow down the search until the root cause is found.
+No matter where in the Flink internal code an exception is thrown we can use the information from the log file to find out which data stream was responsible. Then run the program a few more times to make sure the exception is always thrown at the same data stream. The next step is to make sure that the incoming data is the correct and there is no error present beforehand. Also, it makes sense to check if the incoming data can be manually added to the test case of the transformation at the faulty data stream. If that also works, we know that the root of the infection is, in fact, the data stream. This is enough to correct the defect. If, on the other hand, one of these checks failed we have to go back a few steps and include the option that a transformation might be faulty depending on which of these checks failed. If the exception is thrown at different places all the time, it makes sense to google the exception to make sure that it is not a common problem with Flink. If it does not use the scientific method to narrow down the search until the cause is found.
 
 \subsubsection{No Exception but resulting data is faulty}
-We now have a specific location at which the data gets corrupted. To solve the issue the developer has to look at the transformation method that is used by the data stream. The method can then be debugged on its own be writing a unit test for the method and using the normal Java debugger with breakpoints to exactly see what is happening. To make matters even easier in case the method is very complex the developer should still use the same method described in \ref{TODO}
+We now have a specific location at which the data gets corrupted. To solve the issue, the developer has to look at the transformation method that is used by the data stream. The method can then be debugged on its own be writing a unit test for the method and using the standard Java debugger with breakpoints to accurately see what is happening. To make matters even easier in case, the method is very complicated the developer should still use the same method described in \ref{TODO}
 
 \subsection{Correct the defect}
-With all the information gained by the previous steps we now know where the issue originates from and we can fix the issue. There are a few possibilities:
+With all the information gained by the previous steps, we now know where the issue originates from and we can fix the issue. There are a few possibilities:
 
 \begin{enumerate}
   \item[\ref{mdfCorrectTransformation}] Transformation method Faulty
@@ -235,28 +264,28 @@ With all the information gained by the previous steps we now know where the issu
 
 \subsubsection{Transformation method faulty}
 \label{mdfCorrectTransformation}
-The first step in correcting a failure in a transformation method is to make sure that the unit test checking that method is updated so that the same error can't happen again. Another important thing to rhink about is if such an error would happen again would it be better if the application didn't crash but instead log the error as critical log level and continue on? This could save the company a lot of money in computing cost. It is a good rule of thump that Flink applications should never crash once they are deployed.
+The first step in correcting a failure in a transformation method is to make sure that the unit test checking that method is updated so that the same error can't happen again. Another important thing to think about is if such an error would happen again would it be better if the application didn't crash but instead log the error as critical log level and continue? This could save the company a lot of money in computing cost. It is a good rule of thump that Flink applications should never crash once they are deployed.
 
-\paragraph{Correting the defect} Now that all the prerequirements are done, it is time to actually start correcting the defect. Using the newly written test case and the java debugger we can go through step by step and see at which point the failure appears. Most of this task should already been done by the steps beforehand. If for whatever reason the exact root of the failure could not yet been located, we can use the scientific method to further narrow down the possiblities until the root is found.
+\paragraph{Correting the defect} Now that all the requirements are done, it is time to start correcting the defect. Using the newly written test case and the java debugger we can go through step by step and see at which point the failure appears. Most of this task should already be done by the actions beforehand. If for whatever reason the exact root of the failure could not yet be located, we can use the scientific method to further narrow down the possibilities until the root is found.
 
 \subsubsection{Network issues}
 \label{mdfCorrectNetwork}
 Connection issues are quite common, following these steps should result in a working connection:
 \begin{enumerate}
-  \item Insufficient number of network buffers: If this exception is thrown it means that the jvm size is too small for the amount of parallism that is happening. It can be fixed by increasing buffer in the taskmanager settings. Refer to the Flink documentation for further details: /cite{TODO}.
-  \item Network issues: Both firewalls need to be setup correctly to allow packets through. This can be checked by starting a simple tcp connection between the two systems with Netcat or a similar program.
-  \item Configuration issues: The database has to accept incoming connection requests from the corresponding ip range. This has to be configured in the database settings and varies between different databases.
+  \item Insufficient number of network buffers: If this exception is thrown it means that the JVM size is too small for the amount of parallelism that is happening. It can be fixed by increasing buffer in the task manager settings. Refer to the Flink documentation for further details: /cite{TODO}.
+  \item Network issues: Both firewalls need to be setup correctly to allow packets through. This can be checked by starting a simple TCP connection between the two systems with Netcat or a similar program.
+  \item Configuration issues: The database has to accept incoming connection requests from the corresponding IP range. This has to be configured in the database settings and varies between different databases.
   \item Flink database adapter: Flink has to support the chosen database or a database connector has to be written. Consult the Flink documentation and check if the adapter version is compatible with the Flink version.
   \item Configuration issue: The IP address that is used in Flink could be wrong or the username and password for the connection.
 \end{enumerate}
 
 \subsubsection{Data streams are incompatible}
 \label{mdfCorrectDataStreams}
-There are two possible reasons why data streams would casue problems. Either they are not compatible, or the data that is transfered in them isn't. Another option that should already have been ruled out is a network issue \ref{mdfCorrectNetwork}. Lastly data could arive at the latter data stream in the wrong order. This is only relevant for some applications as most Flink applications, like the word count example, do not care in which order the input arives.
+There are two possible reasons why data streams would cause problems. Either they are not compatible, or the data that is transferred in them isn't. Another option that should already have been ruled out is a network issue \ref{mdfCorrectNetwork}. Lastly, data could arrive at the latter data stream in the wrong order. This is only relevant for some applications as most Flink applications, like the word count example, do not care in which order the input arrives.
 \begin{itemize}
   \item \textbf{Data types} - The developer should make sure that Java generics are used at every appropriate location. This ensures compatibility of the data types because the java compiler checks them.
-  \item \textbf{Data streams not compatible} - The developer should check the documentation of each of the used data stream features to make sure both are compatible. Lastly if that failed also check that the Backend is compatible in the same way.
-  \item \textbf{Data in wrong order} - Applications that depend on data being in the correct order to be processed correctly need to use the "event time watermark" feature which can add a watermark to each piece of data and check if the previous one was processed or not before doing any more work. Because this adds a lot of waiting time and additional comoputing to the process it has to be enabled manually and also implemented at the specific transformations. Watermarks have to be injected at the first data source and can be used afterwards.
+  \item \textbf{Data streams not compatible} - The developer should check the documentation of each of the used data stream features to make sure both are compatible. Lastly, if that failed also check that the Backend is compatible in the same way.
+  \item \textbf{Data in wrong order} - Applications that depend on data being in the correct order to be processed correctly need to use the "event time watermark" feature which can add a watermark to each piece of data and check if the previous one was processed or not before doing any more work. Because this adds a lot of waiting time and additional computing to the process it has to be enabled manually and also implemented at the specific transformations. Watermarks have to be injected at the first data source and can be used afterwards.
 \end{itemize}
 
 \subsubsection{Conclusion}
