@@ -4,6 +4,8 @@ This chapter is the centre part of the thesis. It explains in detail how the met
 \section{Better Developing}
 Flink applications are run remotely and without an active user providing input as it is typical for a regular application. Not having a user makes it much harder to recreate the problem as we only have the log files and the stack trace as information. As such it is crucial to have all the information at hand when the program fails, or we notice discrepancies in the resulting data. The only way to make sure that the information is accessible once a problem is reported is to think about what data is necessary for the debugging developer while writing the program. Another issue is that some problems are unique to a distributed environment and won't happen when running on a local host. This section will explain what can be done while writing the program to make the debugging process much easier.
 
+\pagebreak
+
 \subsection{Building Tasks}
 The Flink framework uses a few features that set it apart from standard Java applications. These are referenced in \ref{flinkFramework}. The one that sets these applications apart from standard Java ones while writing the application is the distribution. Applications should be built in a modular way to take full advantage of these features and also make the program easily debuggable.
 The development of these tasks should be done using a very similar set of rules as the Unix philosophy states. In fact, Flink modules are not too different to Unix command line tools, they both provide a service while taking an input/output in a predefined way. For the Unix command line, this is the standard output, for Flink programs, these are input and output streams.
@@ -35,6 +37,8 @@ It should now be understandable that the programs should be divided into multipl
 
 It makes sense to use the Unix philosophy of having one task do one thing. In most cases there are some obvious logical places to split the program. The same is true for Flink applications. Data is modified or analysed and each of these tasks could be one transformation of the data.
 
+\pagebreak
+
 \subsection{Metrics}
 Now that the architecture of the program is done the next question is what metrics to use in which positions to achieve the optimal security.
 
@@ -54,6 +58,15 @@ Logging in Flink is straightforward and is used the same as in every other Java 
 \section{The Debugging Process}
 
 There are multiple reasons how an error might be discovered; the most common one is an exception in a log file. Another option is that the end user of the results finds that some of the results are incorrect. Both of these cases require slightly different handling. An excellent way to start the debug process is by using a modified version of the Traffic approach introduced in \ref{aodZeller}.
+
+\subsection{Common Problems}
+Like with all frameworks and technologies there are some problems that often occur in Flink applications. This section will outline a few to shorten the debug process if one these is the issue:
+\begin{itemize}
+  \item NotSerializableException - because everything is sent over the network almost everything that is written has to be serializable. This includes all transitions. Because serialization is not often on a developers mind and does not show up as an error in the IDE, it is often forgotten. There can be two reasons for this error, either some class is not implementing the "serializable" interface or local fields in a class are not serializable. If a field does not need to be serialized, because it does not need to be sent over the network, it can be marked with the "transient" keyword.
+  \item Network Exceptions - each system has to be able to communicate with the other systems. See \ref{mdfCorrectNetwork} for a list of possible reasons.
+  \item ClassCastException - Sometimes multiple versions of the same class are loaded, this can happen when class loaders of different tasks and are later assigned to each other. Either a library that caches loaded classes is used in which case one should try to remove them, or the Flink itself is loading classes in the wrong order. This can be solved by adding "classloader.resolve-order: parent-first" to the configuration file.
+\end{itemize}
+The Flink website features a complete list that is regularly updated: \cite{ApacheFlinkFaq}
 
 \subsection{Track the Problem in the database}
 Tracking a problem is essential in every development cycle no matter in which language or with what framework and Flink is no exception. It is crucial for every developer to track the status of problems in Flink applications as it helps to minimise work. Along the already mentioned advantages in chapter \ref{aodZellerTrack}, like having an easily accessible database of open problems and knowing which problems are more important than others, tracking the problems of Flink applications offers some other advantages as well.
@@ -224,6 +237,8 @@ If there is no failure and the resulting data is wrong, the developer can use th
  System.out.println(new Throwable().getStackTrace())
 \end{lstlisting}
 
+\pagebreak
+
 \paragraph{Brief introduction to the Flink Backtracking tool}
 \label{mdfBriefIntroTool}
 
@@ -252,6 +267,8 @@ No matter where in the Flink internal code an exception is thrown we can use the
 
 \subsubsection{No Exception but resulting data is faulty}
 We now have a specific location at which the data gets corrupted. To solve the issue, the developer has to look at the transformation method that is used by the data stream. The method can then be debugged on its own be writing a unit test for the method and using the standard Java debugger with breakpoints to accurately see what is happening. To make matters even easier in case, the method is very complicated the developer should still use the same method described in \ref{mdfCorrectTransformation}
+
+\pagebreak
 
 \subsection{Correct the defect}
 With all the information gained by the previous steps, we now know where the issue originates from and we can fix the issue. There are a few possibilities:
@@ -287,6 +304,8 @@ There are two possible reasons why data streams would cause problems. Either the
   \item \textbf{Data streams not compatible} - The developer should check the documentation of each of the used data stream features to make sure both are compatible. Lastly, if that failed, also check that the Backend is compatible in the same way.
   \item \textbf{Data in wrong order} - Applications that depend on data being in the correct order to be processed correctly need to use the "event time watermark" feature which can add a watermark to each piece of data and check if the previous one was processed or not before doing any more work. Because this adds a lot of waiting time and additional computing to the process it has to be enabled manually and also implemented at the specific transformations. Watermarks have to be injected at the first data source and can be used afterwards.
 \end{itemize}
+
+\pagebreak
 
 \subsubsection{Conclusion}
 Although fixing the defect is the reason the whole debugging process was started it is not the end. As explained in the \ref{aodZellerCorrectDefect} other questions need to be answered before the developer can move on to something else.

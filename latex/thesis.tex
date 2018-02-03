@@ -21,7 +21,7 @@
 \usepackage{natbib}
 \usepackage[ngerman,colorlinks=true]{hyperref}
 \usepackage{soul}
-\usepackage{hawstyle}
+\usepackage[printer]{hawstyle}
 
 %% define some colors
 \colorlet{BackgroundColor}{gray!20}
@@ -105,7 +105,8 @@
 %% note: this is one command on multiple lines
 \HAWAbstractPage
 %% German abstract
-{Das Debuggen von Programmen ist kompliziert, wird aber in einem verteilten System noch komplizierter. Je größer die Täglich erzeugten Datenmengen werden, desto wichtiger wird die Nutzung verteilter Anwendung. Flink ist ein Framework zur verteilten verarbeitung von Daten aus einem Stream, wobei die Daten zwischen den einzelnen Verarbeitungsschritten ebenfalls durch Streams transportiert werden. Flink erleichtert es dem Entwickler, verteilte Anwendung, die auf der Datenverarbeitung basieren zu entwickeln. Diese Thesis stellt eine Methodik zum Debuggen von eben diesen Flink Applikationen dar.}
+{Flink, Debugging, Stream Processing, Methodik zum Debuggen, Java Debuggen, Flink Debuggen}%
+{Das Debuggen von Programmen ist kompliziert, wird aber in einem verteilten System noch komplizierter. Je größer die täglich erzeugten Datenmengen werden, desto wichtiger wird die Nutzung verteilter Anwendung. Flink ist ein Framework zur verteilten verarbeitung von Daten aus einem Stream, wobei die Daten zwischen den einzelnen Verarbeitungsschritten ebenfalls durch Streams transportiert werden. Flink erleichtert es dem Entwickler, verteilte Anwendung, die auf der Datenverarbeitung basieren zu entwickeln. Diese Thesis stellt eine Methodik zum Debuggen von eben diesen Flink Anwendungen dar.}
 %% English abstract
 {Flink, Debugging, Stream Processing, Methodology for Debugging, Debugging Java, Debugging Flink}%
 {Debugging Applications is hard, debugging distributed applications is harder and the more massive the amount of data that gets generated every day gets, the higher the need for these distributed applications. Flink is a distributed stream processing framework; it processes data while only using streams. It makes it easy for developers to write these distributed applications to handle the ever-growing amounts of data in the world. This thesis explains how to debug these Flink applications by providing a debugging methodology.}
@@ -145,7 +146,6 @@
 \chapter{Flink Backtracker}
 \label{flinkBacktracker}
   \input{flinkBacktracker.tex}
-
 
 \typeout{===== File: chapter 6}
 \chapter{Conclusion and Outlook}

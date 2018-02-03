@@ -1,10 +1,23 @@
-Summing up all the pieces, this thesis provided a methodology for debugging Flink applications. The basic procedure of a Flink application was discussed, and the pitfalls of writing these programs marked, along the thesis a sample word count application was used to picturise the methods. A tool was written that provides the developer with more information than are available with Flink. Namely which piece of data at which transition lead to which piece of data in the next transition. This allows the developer to gain a better overview over what the program is actually doing compared with what hw thought the program was doing.
+Summing up all the pieces, this thesis outlined how to debug complex systems, in general, showed how Flink programs are different to regular Java applications and used that knowledge to provide a methodology for debugging Flink applications. The basic procedure of a Flink application was discussed, and the pitfalls of writing these programs marked, along the thesis a sample WordCount application was used to picturise the methods. A tool was written that provides the developer with more information than are available with Flink. Namely which piece of data at which transition lead to which part of data in the next transition. This allows the developer to gain a better overview of what the program is doing compared with what he thought the program was doing.
+
+\section{Lessons Learned}
+This thesis showed a few things about debugging and writing Flink applications that were not obvious before. Bad programming is made harder because the developer does not have the freedom of writing whatever they want. Instead, they have to build using the framework which limits the possible architectural failures. The developer can still make mistakes and does so easily because the framework extends Java to be more complex which in turn makes the development process more complex but as long as the developer understands the base concept of the framework and where to put which piece of code he always has a good point of entry to the debugging process especially with the methodology in this thesis.
+
+\pagebreak
 
 \section{Outlook}
-Only the data stream part of Flink was discussed in this thesis as Flink also offers a dataset API it would make sense to research how the dataset API might differ in sense of debugging. Although a lot of the same principles still hold true there, it is by no means the same.
+There are a few things that need further research in this thesis:
+\begin{enumerate}
+  \item Only the data stream part of Flink was discussed in this thesis. As Flink also offers a dataset API, it would make sense to research how the dataset API might differ in the sense of debugging. Although a lot of the same principles still hold true there, it is by no means the same.
+  \item The Backtracker was not experimented with in a lot of different use cases. Data about additional computing power use and more importantly computing time could be useful.
+  \item The functionality of the debugger can be extended as explained in \ref{fbState}.
+  \item Because of the lack of articles about good debugging in general and more specifically debugging frameworks. It might make sense to use the information gained by this thesis to write a methodology for debugging frameworks in general.
+\end{enumerate}
 
 \section{Further Reading}
 This section will outline a few more articles or books to read that are relevant to the thesis but were not directly mentioned.
 
-\paragraph{} The beginning of the thesis provided some proposals on how to minimise the debugging. It was suggested to use theorem proving or model checking. Because it is not really part of the debugging process it was mostly left out, but because it can be quite helpful for some circumstances it makes sense to read more about it. Amazon uses model checking in some departments and found some bugs that were not known before: \cite{Newcombe:2015:AWS:2749359.2699417}.
+\paragraph{} The beginning of the thesis provided some proposals on how to minimise the debugging. It was suggested to use theorem proving or model checking. Because it is not part of the debugging process, it was mostly left out, but because it can be quite helpful for some circumstances, it makes sense to read more about it. Amazon uses model checking in some departments and found some bugs that were not known before: \cite{Newcombe:2015:AWS:2749359.2699417}.
 A common language for writing these is called TLA+. It is a functional language where the core function of the program is mathematically written. A good introduction can be found here: \cite{Lamport:2002:SST:579617}.
+
+\paragraph{} If this thesis was read not specifically for gaining an understanding about debugging Flink but for debugging distributed systems, in general, consider reading \cite{Olston:2011:IGF:1989323.1989459} as well. It provides some tooling for monitoring and debugging distributed systems that Flink already includes. So some of the information that are crucial in finding bugs might be found using it. Another fascinating study about missing events in distributed systems is also worth reading \cite{Wu:2014:DME:2740070.2626335}.
